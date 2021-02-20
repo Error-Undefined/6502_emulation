@@ -23,6 +23,9 @@ struct cpu_struct
     Byte V : 1; // Bit 6, Overflow flag
     Byte N : 1; // Bit 7, Negative flag
   } status_flags;
+
+  // Pointer to the memory for the CPU
+  struct memory_struct* memory;
 };
 
 void initialize_cpu(struct cpu_struct *cpu, struct memory_struct *memory);

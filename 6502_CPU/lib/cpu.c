@@ -25,5 +25,7 @@ void initialize_cpu(struct cpu_struct* cpu, struct memory_struct* memory)
   cpu->status_flags.V = 0;
   cpu->status_flags.N = 0;
 
+  cpu->memory = memory;
+
   initialize_memory(memory);
 }
