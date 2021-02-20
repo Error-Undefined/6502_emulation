@@ -24,10 +24,24 @@ struct cpu_struct
     Byte N : 1; // Bit 7, Negative flag
   } status_flags;
 
-  // Pointer to the memory for the CPU
-  struct memory_struct* memory;
+  // Pointer to the memory for the CPU - like a memory bus
+  struct memory_struct* memory_bus;
 };
 
-void initialize_cpu(struct cpu_struct *cpu, struct memory_struct *memory);
+// Reset ops
+void reset_cpu_word(struct cpu_struct *cpu, struct memory_struct *memory, Word reset_word);
+void reset_cpu(struct cpu_struct *cpu, struct memory_struct *memory);
+
+// Fetch operations
+Byte fetch_byte(struct cpu_struct *cpu, s32* cycles);
+Word fetch_word(struct cpu_struct *cpu, s32* cycles);
+
+// Read operations
+Byte read_byte(struct cpu_struct *cpu, s32* cycles, Word address);
+Word read_word(struct cpu_struct *cpu, s32* cycles, Word address);
+
+// Write operations
+void write_byte(struct cpu_struct *cpu, s32* cycles, Word address, Byte value);
+void write_word(struct cpu_struct *cpu, s32* cycles, Word address, Word value);
 
 #endif
