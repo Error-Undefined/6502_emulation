@@ -13,8 +13,4 @@ struct memory_struct
 
 void initialize_memory(struct memory_struct* memory);
 
-Byte read_byte(struct memory_struct* memory, LongWord address);
-
-Byte write_byte(struct memory_struct* memory, LongWord address, Byte b);
-
 #endif
