@@ -3,6 +3,8 @@
 #ifndef MEM_H
 #define MEM_H
 
+typedef struct memory_struct memory_type;
+
 struct memory_struct
 {
   // The 6502 accesses 64 kB of memory on an 16 bit bus (in hex 0xFFFF)
@@ -10,5 +12,9 @@ struct memory_struct
 };
 
 void initialize_memory(struct memory_struct* memory);
+
+Byte read_byte(struct memory_struct* memory, LongWord address);
+
+Byte write_byte(struct memory_struct* memory, LongWord address, Byte b);
 
 #endif
