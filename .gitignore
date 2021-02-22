@@ -1,3 +1,5 @@
+.vscode
+
 *.out
 *.o
 cpu_main.c
