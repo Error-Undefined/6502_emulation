@@ -48,6 +48,7 @@ static void test_lda_abs_setup(Instruction_Type instruction, Word absolute_addre
 
 static char* test_nothing_happens()
 {
+  start_test_info();
   //Using
   s32 cycles = 0;
 
@@ -61,6 +62,7 @@ static char* test_nothing_happens()
 
 static char* test_lda_im()
 {
+  start_test_info();
   //Setup and run
   s32 cycles = 2;
   test_lda_im_setup(0x50, &cycles);
@@ -73,6 +75,8 @@ static char* test_lda_im()
 
 static char* test_lda_zeroflag()
 {
+  start_test_info();
+
   //Setup and run
   s32 cycles = 2;
   test_lda_im_setup(0x0, &cycles);
@@ -86,6 +90,7 @@ static char* test_lda_zeroflag()
 
 static char* test_lda_negativeflag()
 {
+  start_test_info();
   //Setup and run
   s32 cycles = 2;
   test_lda_im_setup(0b1000000, &cycles);
@@ -99,6 +104,8 @@ static char* test_lda_negativeflag()
 
 static char* test_lda_zp()
 {
+  start_test_info();
+
   //Setup and run
   s32 cycles = 3;
   Byte value = 0x20;
@@ -111,6 +118,8 @@ static char* test_lda_zp()
 
 static char* test_lda_zp_x()
 {
+  start_test_info();
+
   //Setup and run
   s32 cycles = 4;
   Byte value = 0x15;
@@ -125,6 +134,8 @@ static char* test_lda_zp_x()
 
 static char* test_lda_abs()
 {
+  start_test_info();
+  
   //Setup and run
   s32 cycles = 4;
   Byte value = 0x43;
@@ -138,6 +149,8 @@ static char* test_lda_abs()
 
 static char* test_lda_abs_x()
 {
+  start_test_info();
+
   s32 cycles = 4;
   Byte value = 0x43;
   Word absolute_address = 0x1235;
@@ -151,6 +164,8 @@ static char* test_lda_abs_x()
 
 static char* test_lda_abs_x_crosses_page()
 {
+  start_test_info();
+
   s32 cycles = 5;
   Byte value = 0x43;
   Word absolute_address = 0x12FF; // To cross a page boundary
@@ -164,6 +179,8 @@ static char* test_lda_abs_x_crosses_page()
 
 static char* test_lda_ind_x()
 {
+  start_test_info();
+
   //Given
   s32 cycles = 6;
   Byte value = 0xA4;
@@ -186,6 +203,8 @@ static char* test_lda_ind_x()
 
 static char* test_lda_ind_x_with_wrap()
 {
+  start_test_info();
+
   //Given
   s32 cycles = 6;
   Byte value = 0xA4;
@@ -208,6 +227,8 @@ static char* test_lda_ind_x_with_wrap()
 
 static char* test_lda_ind_y()
 {
+  start_test_info();
+
   //Given
   s32 cycles = 5;
   Byte value = 0xEE;
@@ -231,6 +252,8 @@ static char* test_lda_ind_y()
 
 static char* test_lda_ind_y_crosses_page()
 {
+  start_test_info();
+
   //Given
   s32 cycles = 6;
   Byte value = 0xEE;
@@ -308,7 +331,7 @@ int run_all_lda_test(struct cpu_struct* cpu_in, struct memory_struct* memory_in)
     return -1;
   }
 
-  printf("All LDA tests passed\n");
+  printf("All LDA tests passed\n---------\n");
 
   return 0;
 }

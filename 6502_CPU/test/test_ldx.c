@@ -12,10 +12,11 @@ static void before()
 
 static char* test_ldx_im()
 {
+  start_test_info();
   //Given
   Byte value = 0x3f;
   s32 cycles = 2;
-  memory->memory_array[0xFFFC] = INS_LDX_ABS;
+  memory->memory_array[0xFFFC] = INS_LDX_IM;
   memory->memory_array[0xFFFD] = value;
   
   //Run
@@ -24,11 +25,13 @@ static char* test_ldx_im()
   //Expect
   mu_assert("X register was not loaded with the right value", cpu->X == value);
   mu_assert("Wrong number of cycles consumed", cycles == 0);
+  
   return 0;
 }
 
 static char* test_ldx_zp()
 {
+  start_test_info();
   //Using
   s32 cycles = 3;
   Byte addr_in_zeropage = 0x32;
@@ -37,7 +40,7 @@ static char* test_ldx_zp()
   //Given
   memory->memory_array[0xFFFC] = INS_LDX_ZP;
   memory->memory_array[0xFFFD] = addr_in_zeropage;
-  memory->memory_array[0x12] = value_in_zeropage;
+  memory->memory_array[addr_in_zeropage] = value_in_zeropage;
 
   //Run
   execute(cpu, &cycles);
@@ -50,6 +53,7 @@ static char* test_ldx_zp()
 
 static char* test_ldx_zp_y()
 {
+  start_test_info();
   //Using
   s32 cycles = 3;
   Byte addr_in_zeropage = 0x32;
@@ -59,7 +63,7 @@ static char* test_ldx_zp_y()
   //Given
   memory->memory_array[0xFFFC] = INS_LDX_ZP_Y;
   memory->memory_array[0xFFFD] = addr_in_zeropage;
-  memory->memory_array[0x12 + cpu->Y] = value_in_zeropage;
+  memory->memory_array[addr_in_zeropage + cpu->Y] = value_in_zeropage;
 
   //Run
   execute(cpu, &cycles);
@@ -72,6 +76,7 @@ static char* test_ldx_zp_y()
 
 static char* test_ldx_abs()
 {
+  start_test_info();
   //Using
   s32 cycles = 4;
   Word absolute_addr = 0x2312;
@@ -98,6 +103,8 @@ static char* test_ldx_abs()
 
 static char* test_ldx_abs_y()
 {
+  start_test_info();
+
   //Using
   s32 cycles = 4;
   Word absolute_addr = 0x2312;
@@ -125,6 +132,7 @@ static char* test_ldx_abs_y()
 
 static char* test_ldx_abs_y_page_cross()
 {
+  start_test_info();
   //Using
   s32 cycles = 5;
   Word absolute_addr = 0x23FF;
@@ -157,7 +165,7 @@ static char* all_ldx_test()
 
   before();
   mu_run_test(test_ldx_zp);
-  
+
   before();
   mu_run_test(test_ldx_zp_y);
   
@@ -185,7 +193,7 @@ int run_all_ldx_test(struct cpu_struct* cpu_in, struct memory_struct* memory_in)
     fprintf(stderr,"Not all LDX tests passed\n");
     return -1;
   }
-  printf("All LDX tests passed\n");
+  printf("All LDX tests passed\n---------\n");
 
   return 0;
 }

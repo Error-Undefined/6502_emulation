@@ -14,7 +14,7 @@ int main()
 
   printf("Running LDX test...\n");
   run_all_ldx_test(&cpu, &memory);
-
+  
 
   printf("End test suite\n");
 
