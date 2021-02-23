@@ -131,6 +131,14 @@ void execute(struct cpu_struct *cpu, s32* cycles)
         load_to_register(cpu, &cpu->Acc, load);
         break;
       }
+      case INS_LDA_ABS:
+      {
+        Word addr_absolute = fetch_word(cpu, cycles);
+        Byte load = read_byte(cpu, cycles, addr_absolute);
+        load_to_register(cpu, &cpu->Acc, load);
+        break;
+      }
+
 
       default:
         printf("Found instruction %x, not implemented! Returning from execution\n", instruction);
