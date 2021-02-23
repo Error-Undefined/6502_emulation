@@ -27,10 +27,148 @@ static char* test_ldx_im()
   return 0;
 }
 
+static char* test_ldx_zp()
+{
+  //Using
+  s32 cycles = 3;
+  Byte addr_in_zeropage = 0x32;
+  Byte value_in_zeropage = 0x45;
+
+  //Given
+  memory->memory_array[0xFFFC] = INS_LDX_ZP;
+  memory->memory_array[0xFFFD] = addr_in_zeropage;
+  memory->memory_array[0x12] = value_in_zeropage;
+
+  //Run
+  execute(cpu, &cycles);
+
+  //Expect
+  mu_assert("X register loaded wrong value", cpu->X == value_in_zeropage);
+  mu_assert("LDX_ZP did not consume exactly 3 cycles", cycles == 0);
+  return 0;
+}
+
+static char* test_ldx_zp_y()
+{
+  //Using
+  s32 cycles = 3;
+  Byte addr_in_zeropage = 0x32;
+  Byte value_in_zeropage = 0x45;
+  cpu->Y = 0x6;
+
+  //Given
+  memory->memory_array[0xFFFC] = INS_LDX_ZP_Y;
+  memory->memory_array[0xFFFD] = addr_in_zeropage;
+  memory->memory_array[0x12 + cpu->Y] = value_in_zeropage;
+
+  //Run
+  execute(cpu, &cycles);
+
+  //Expect
+  mu_assert("X register loaded wrong value", cpu->X == value_in_zeropage);
+  mu_assert("LDX_ZP_Y did not consume exactly 4 cycles", cycles == 0);
+  return 0;
+}
+
+static char* test_ldx_abs()
+{
+  //Using
+  s32 cycles = 4;
+  Word absolute_addr = 0x2312;
+  Byte value = 0x45;
+
+  Byte lower_address = absolute_addr & 0xFF;
+  Byte higher_address = absolute_addr >> 8;
+
+  //Given
+  memory->memory_array[0xFFFC] = INS_LDX_ABS;
+  memory->memory_array[0xFFFD] = lower_address;
+  memory->memory_array[0xFFFE] = higher_address;
+  memory->memory_array[absolute_addr] = value;
+
+  //Run
+  execute(cpu, &cycles);
+
+  //Expect
+  //Expect
+  mu_assert("X register loaded wrong value", cpu->X == value);
+  mu_assert("LDX_ABS did not consume exactly 4 cycles", cycles == 0);
+  return 0;
+}
+
+static char* test_ldx_abs_y()
+{
+  //Using
+  s32 cycles = 4;
+  Word absolute_addr = 0x2312;
+  Byte value = 0x45;
+  cpu->Y = 0x32;
+
+  Byte lower_address = absolute_addr & 0xFF;
+  Byte higher_address = absolute_addr >> 8;
+
+  //Given
+  memory->memory_array[0xFFFC] = INS_LDX_ABS;
+  memory->memory_array[0xFFFD] = lower_address;
+  memory->memory_array[0xFFFE] = higher_address;
+  memory->memory_array[absolute_addr + cpu->Y] = value;
+
+  //Run
+  execute(cpu, &cycles);
+
+  //Expect
+  //Expect
+  mu_assert("X register loaded wrong value", cpu->X == value);
+  mu_assert("LDX_ABS_Y did not consume exactly 4 cycles", cycles == 0);
+  return 0;
+}
+
+static char* test_ldx_abs_y_page_cross()
+{
+  //Using
+  s32 cycles = 5;
+  Word absolute_addr = 0x23FF;
+  Byte value = 0x17;
+  cpu->Y = 0xA1;
+
+  Byte lower_address = absolute_addr & 0xFF;
+  Byte higher_address = absolute_addr >> 8;
+
+  //Given
+  memory->memory_array[0xFFFC] = INS_LDX_ABS;
+  memory->memory_array[0xFFFD] = lower_address;
+  memory->memory_array[0xFFFE] = higher_address;
+  memory->memory_array[absolute_addr + cpu->Y] = value;
+
+  //Run
+  execute(cpu, &cycles);
+
+  //Expect
+  //Expect
+  mu_assert("X register loaded wrong value", cpu->X == value);
+  mu_assert("LDX_ABS_Y with page cross did not consume exactly 5 cycles", cycles == 0);
+  return 0;
+}
+
 static char* all_ldx_test()
 {
   before();
   mu_run_test(test_ldx_im);
+
+  before();
+  mu_run_test(test_ldx_zp);
+  
+  before();
+  mu_run_test(test_ldx_zp_y);
+  
+  before();
+  mu_run_test(test_ldx_abs);
+
+  before();
+  mu_run_test(test_ldx_abs_y);
+
+  before();
+  mu_run_test(test_ldx_abs_y_page_cross);
 
   return 0;
 }
@@ -47,7 +185,7 @@ int run_all_ldx_test(struct cpu_struct* cpu_in, struct memory_struct* memory_in)
     fprintf(stderr,"Not all LDX tests passed\n");
     return -1;
   }
-  printf("All LDX test passed\n");
+  printf("All LDX tests passed\n");
 
   return 0;
 }

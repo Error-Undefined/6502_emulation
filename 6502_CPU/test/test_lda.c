@@ -308,7 +308,7 @@ int run_all_lda_test(struct cpu_struct* cpu_in, struct memory_struct* memory_in)
     return -1;
   }
 
-  printf("All LDA test passed\n");
+  printf("All LDA tests passed\n");
 
   return 0;
 }
