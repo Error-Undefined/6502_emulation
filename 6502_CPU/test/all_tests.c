@@ -12,6 +12,8 @@ int main()
   printf("Running LDA test..\n");
   run_all_lda_test(&cpu, &memory);
 
+
+
   printf("End test suite\n");
 
   printf("Tests run: %d\n", tests_run);

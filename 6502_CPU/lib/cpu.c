@@ -166,13 +166,27 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       }
       case INS_LDA_IND_X:
       {
-        Byte addr_indirect = fetch_byte(cpu, cycles);
-        
+        Word addr_indirect = fetch_byte(cpu, cycles);
         addr_indirect = (cpu->X + addr_indirect) & 0xFF; // Wrap around at 0xFF
-        //Consume three cycles (read X, add and and)
+        //Consume three cycles (read X, add, and)
         *(cycles) = *(cycles) - 3;
 
         Byte load = read_byte(cpu, cycles, addr_indirect);        
+        load_to_register(cpu, &cpu->Acc, load);
+        break;
+      }
+      case INS_LDA_IND_Y:
+      {
+        Word addr_indirect = fetch_byte(cpu, cycles);
+        addr_indirect = addr_indirect + cpu->Y;
+        //Consume two cycles (read Y, add)
+        *(cycles) = *(cycles) - 2;
+        // Test if we cross a page boundary (Higher byte after addition is not 0) and consume a cycle
+        if(addr_indirect & 0xFF00)
+        {
+          *(cycles) = *(cycles) - 1;
+        }
+        Byte load = read_byte(cpu, cycles, addr_indirect);
         load_to_register(cpu, &cpu->Acc, load);
         break;
       }
