@@ -97,18 +97,26 @@ void execute(struct cpu_struct *cpu, s32* cycles)
   {
     // Fetch the next instruction from the PC
     Byte instruction = fetch_byte(cpu, cycles);
-    Byte load;
-
     switch (instruction)
     {
+      
       case INS_LDA_IM:
-      //Byte load = fetch_byte(cpu, cycles);
-        load = fetch_byte(cpu, cycles);
+      {
+        Byte load = fetch_byte(cpu, cycles);
         cpu->Acc = load;
         cpu->status_flags.Z = ~load;
         cpu->status_flags.N = (load >> 6);
         break;
-    
+      }
+      case INS_LDA_ZP:
+      {
+        Byte addr_in_zp = fetch_byte(cpu, cycles);
+        Byte load = read_byte(cpu, cycles, addr_in_zp);
+        cpu->Acc = load;
+        cpu->status_flags.Z = ~load;
+        cpu->status_flags.N = (load >> 6);
+        break;
+      }
       default:
         printf("Found instruction %x, not implemented! Returning from execution\n", instruction);
         return;

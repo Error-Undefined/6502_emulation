@@ -56,7 +56,7 @@ static char* test_lda_im()
   return 0;
 }
 
-static char* test_lda_im_zeroflag()
+static char* test_lda_zeroflag()
 {
   //Setup and run
   s32 cycles = 2;
@@ -69,7 +69,7 @@ static char* test_lda_im_zeroflag()
   return 0;
 }
 
-static char* test_lda_im_negativeflag()
+static char* test_lda_negativeflag()
 {
   //Setup and run
   s32 cycles = 2;
@@ -97,17 +97,18 @@ static char* test_lda_zp()
 
 static char* all_lda_test()
 {
+
+  before();
+  mu_run_test(test_nothing_happens);
+  
   before();
   mu_run_test(test_lda_im);
 
   before();
-  mu_run_test(test_nothing_happens);
+  mu_run_test(test_lda_zeroflag);
 
   before();
-  mu_run_test(test_lda_im_zeroflag);
-
-  before();
-  mu_run_test(test_lda_im_negativeflag);
+  mu_run_test(test_lda_negativeflag);
 
   before();
   mu_run_test(test_lda_zp);
