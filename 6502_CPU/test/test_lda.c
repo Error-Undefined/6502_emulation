@@ -136,6 +136,32 @@ static char* test_lda_abs()
   return 0;
 }
 
+static char* test_lda_abs_x()
+{
+  s32 cycles = 4;
+  Byte value = 0x43;
+  Word absolute_address = 0x1235;
+  cpu->X = 0x5;
+  test_lda_abs_setup(INS_LDA_ABS_X, absolute_address, value, &cycles);
+
+  mu_assert("Accumulator loaded wrong value", cpu->Acc == value);
+  mu_assert("LDA_ABS_X did not consume exactly 4 cycles", cycles == 0);
+  return 0;
+}
+
+static char* test_lda_abs_x_crosses_page()
+{
+  s32 cycles = 5;
+  Byte value = 0x43;
+  Word absolute_address = 0x12FF; // To cross a page boundary
+  cpu->X = 0x5;
+  test_lda_abs_setup(INS_LDA_ABS_X, absolute_address, value, &cycles);
+
+  mu_assert("Accumulator loaded wrong value", cpu->Acc == value);
+  mu_assert("LDA_ABS_X with page cross did not consume exactly 5 cycles", cycles == 0);
+  return 0;
+}
+
 static char* all_lda_test()
 {
 
@@ -159,6 +185,12 @@ static char* all_lda_test()
   
   before();
   mu_run_test(test_lda_abs);
+
+  before();
+  mu_run_test(test_lda_abs_x);
+
+  before();
+  mu_run_test(test_lda_abs_x_crosses_page);
 
   return 0;
 }
