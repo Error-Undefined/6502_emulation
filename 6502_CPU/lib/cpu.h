@@ -44,4 +44,7 @@ Word read_word(struct cpu_struct *cpu, s32* cycles, Word address);
 void write_byte(struct cpu_struct *cpu, s32* cycles, Word address, Byte value);
 void write_word(struct cpu_struct *cpu, s32* cycles, Word address, Word value);
 
+// Start execution
+void execute(struct cpu_struct *cpu, s32* cycles);
+
 #endif

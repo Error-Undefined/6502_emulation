@@ -1,8 +1,10 @@
+#include <stdio.h>
 
 #include "data_types.h"
 
 #include "cpu.h"
 #include "memory.h"
+#include "instructions.h"
 
 
 void reset_cpu(struct cpu_struct* cpu, struct memory_struct* memory)
@@ -87,3 +89,31 @@ void write_word(struct cpu_struct *cpu, s32* cycles, Word address, Word value)
   write_byte(cpu, cycles, address, higher_value);
 }
 
+
+void execute(struct cpu_struct *cpu, s32* cycles)
+{ 
+  //While the number of cycles is still > 0
+  while(*cycles > 0)
+  {
+    // Fetch the next instruction from the PC
+    Byte instruction = fetch_byte(cpu, cycles);
+    Byte load;
+
+    switch (instruction)
+    {
+      case INS_LDA_IM:
+      //Byte load = fetch_byte(cpu, cycles);
+        load = fetch_byte(cpu, cycles);
+        cpu->Acc = load;
+        cpu->status_flags.Z &= load;
+        cpu->status_flags.N &= (load >> 7);
+        break;
+    
+      default:
+        printf("Found instruction %x, not implemented! Returning from execution\n", instruction);
+        return;
+        break;
+    }
+
+  }
+}
