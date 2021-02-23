@@ -138,6 +138,14 @@ void execute(struct cpu_struct *cpu, s32* cycles)
         load_to_register(cpu, &cpu->Acc, load);
         break;
       }
+      case INS_LDA_ABS_X:
+      {
+        Word addr_absolute = fetch_word(cpu, cycles);
+        addr_absolute += cpu->X;
+        Byte load = read_byte(cpu, cycles, addr_absolute);
+        load_to_register(cpu, &cpu->Acc, load);
+        break;
+      }
 
 
       default:
