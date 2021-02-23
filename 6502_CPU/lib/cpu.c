@@ -89,6 +89,13 @@ void write_word(struct cpu_struct *cpu, s32* cycles, Word address, Word value)
   write_byte(cpu, cycles, address, higher_value);
 }
 
+void load_to_register(struct cpu_struct* cpu, Byte* register_to_load, Byte value)
+{
+  *register_to_load = value;
+  cpu->status_flags.Z = ~value;
+  cpu->status_flags.N = (value >> 6);
+}
+
 
 void execute(struct cpu_struct *cpu, s32* cycles)
 { 
@@ -103,20 +110,28 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       case INS_LDA_IM:
       {
         Byte load = fetch_byte(cpu, cycles);
-        cpu->Acc = load;
-        cpu->status_flags.Z = ~load;
-        cpu->status_flags.N = (load >> 6);
+        load_to_register(cpu, &cpu->Acc, load);
         break;
       }
       case INS_LDA_ZP:
       {
         Byte addr_in_zp = fetch_byte(cpu, cycles);
         Byte load = read_byte(cpu, cycles, addr_in_zp);
-        cpu->Acc = load;
-        cpu->status_flags.Z = ~load;
-        cpu->status_flags.N = (load >> 6);
+        load_to_register(cpu, &cpu->Acc, load);
         break;
       }
+      case INS_LDA_ZP_X:
+      {
+        Byte addr_in_zp = fetch_byte(cpu, cycles);
+        
+        addr_in_zp += cpu->X;
+        *(cycles) = *(cycles) - 1; // Consume an extra cycle
+
+        Byte load = read_byte(cpu, cycles, addr_in_zp);
+        load_to_register(cpu, &cpu->Acc, load);
+        break;
+      }
+
       default:
         printf("Found instruction %x, not implemented! Returning from execution\n", instruction);
         return;
