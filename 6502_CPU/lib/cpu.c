@@ -105,8 +105,8 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       //Byte load = fetch_byte(cpu, cycles);
         load = fetch_byte(cpu, cycles);
         cpu->Acc = load;
-        cpu->status_flags.Z &= load;
-        cpu->status_flags.N &= (load >> 7);
+        cpu->status_flags.Z = ~load;
+        cpu->status_flags.N = (load >> 6);
         break;
     
       default:
