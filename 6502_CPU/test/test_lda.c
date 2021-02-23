@@ -189,15 +189,58 @@ static char* test_lda_ind_x_with_wrap()
   //Given
   s32 cycles = 6;
   Byte value = 0xA4;
-  Byte indirect_address = 0xff;
+  Byte indirect_address = 0xFF;
   cpu->X = 0x30;
-  
-  return 0;
 
   //Set up memory
   memory->memory_array[0xFFFC] = INS_LDA_IND_X;
   memory->memory_array[0xFFFD] = indirect_address;
   memory->memory_array[0x2F] = value; // Wrap around at the end of the zero page
+
+  //Execute
+  execute(cpu, &cycles);
+
+  //Expect
+  mu_assert("Accumulator loaded wrong value", cpu->Acc == value);
+  mu_assert("LDA_IND_X did not consume exactly 6 cycles", cycles == 0);
+  return 0;
+}
+
+static char* test_lda_ind_y()
+{
+  //Given
+  s32 cycles = 5;
+  Byte value = 0xEE;
+  Byte indirect_address = 0x12;
+  cpu->Y = 0x15;
+
+  //Set up memory
+  memory->memory_array[0xFFFC] = INS_LDA_IND_Y;
+  memory->memory_array[0xFFFD] = indirect_address;
+  memory->memory_array[0x27] = value; 
+
+  //Execute
+  execute(cpu, &cycles);
+
+  //Expect
+  mu_assert("Accumulator loaded wrong value", cpu->Acc == value);
+  mu_assert("LDA_IND_X did not consume exactly 5 cycles", cycles == 0);
+
+  return 0;
+}
+
+static char* test_lda_ind_y_crosses_page()
+{
+  //Given
+  s32 cycles = 6;
+  Byte value = 0xEE;
+  Byte indirect_address = 0xff;
+  cpu->Y = 0x18;
+
+  //Set up memory
+  memory->memory_array[0xFFFC] = INS_LDA_IND_Y;
+  memory->memory_array[0xFFFD] = indirect_address;
+  memory->memory_array[0x117] = value; 
 
   //Execute
   execute(cpu, &cycles);
@@ -243,6 +286,12 @@ static char* all_lda_test()
 
   before();
   mu_run_test(test_lda_ind_x_with_wrap);
+
+  before();
+  mu_run_test(test_lda_ind_y);
+
+  before();
+  mu_run_test(test_lda_ind_y_crosses_page);
 
   return 0;
 }
