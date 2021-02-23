@@ -55,7 +55,7 @@ static char* test_ldx_zp_y()
 {
   start_test_info();
   //Using
-  s32 cycles = 3;
+  s32 cycles = 4;
   Byte addr_in_zeropage = 0x32;
   Byte value_in_zeropage = 0x45;
   cpu->Y = 0x6;
@@ -115,15 +115,14 @@ static char* test_ldx_abs_y()
   Byte higher_address = absolute_addr >> 8;
 
   //Given
-  memory->memory_array[0xFFFC] = INS_LDX_ABS;
+  memory->memory_array[0xFFFC] = INS_LDX_ABS_Y;
   memory->memory_array[0xFFFD] = lower_address;
   memory->memory_array[0xFFFE] = higher_address;
   memory->memory_array[absolute_addr + cpu->Y] = value;
 
   //Run
   execute(cpu, &cycles);
-
-  //Expect
+  
   //Expect
   mu_assert("X register loaded wrong value", cpu->X == value);
   mu_assert("LDX_ABS_Y did not consume exactly 4 cycles", cycles == 0);
