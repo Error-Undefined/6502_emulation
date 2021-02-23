@@ -29,6 +29,21 @@ static void test_lda_zp_setup(Instruction_Type instruction, Byte jump_to_zeropag
   execute(cpu, cycles);
 }
 
+static void test_lda_abs_setup(Instruction_Type instruction, Word absolute_address, Byte value, s32* cycles)
+{
+  memory->memory_array[0xFFFC] = instruction;
+  // Extract as little endian
+  Byte lower_address = absolute_address & 0xFF;
+  Byte higher_address = absolute_address >> 8;
+  
+  memory->memory_array[0xFFFD] = lower_address;
+  memory->memory_array[0xFFFE] = higher_address;
+
+  memory->memory_array[absolute_address + cpu->X + cpu->Y] = value;
+
+  execute(cpu, cycles);
+}
+
 // LDA_IM
 
 static char* test_nothing_happens()
@@ -102,11 +117,22 @@ static char* test_lda_zp_x()
   cpu->X = 0x3; // Put 3 in X register for ZP-X
   test_lda_zp_setup(INS_LDA_ZP_X, 0x10, value, &cycles);
 
-  printf("Cycles = %d\n", cycles);
-
   mu_assert("Accumulator loaded wrong value", cpu->Acc == value);
   mu_assert("LDA_ZP_X did not consume exactly 4 cycles", cycles == 0);
   
+  return 0;
+}
+
+static char* test_lda_abs()
+{
+  //Setup and run
+  s32 cycles = 4;
+  Byte value = 0x43;
+  Word absolute_address = 0x1235;
+  test_lda_abs_setup(INS_LDA_ABS, absolute_address, value, &cycles);
+
+  mu_assert("Accumulator loaded wrong value", cpu->Acc == value);
+  mu_assert("LDA_ABS did not consume exactly 4 cycles", cycles == 0);
   return 0;
 }
 
@@ -131,6 +157,8 @@ static char* all_lda_test()
   before();
   mu_run_test(test_lda_zp_x);
   
+  before();
+  mu_run_test(test_lda_abs);
 
   return 0;
 }
