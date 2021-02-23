@@ -141,12 +141,29 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       case INS_LDA_ABS_X:
       {
         Word addr_absolute = fetch_word(cpu, cycles);
-        addr_absolute += cpu->X;
+        // Test if we cross a page boundary (Higher byte after addition is different) and consume a cycle
+        if(((addr_absolute >> 4) ^ ((addr_absolute + cpu->X) >> 4)))
+        {
+          *(cycles) = *(cycles) - 1;
+        }
+        addr_absolute += cpu->X;       
         Byte load = read_byte(cpu, cycles, addr_absolute);
         load_to_register(cpu, &cpu->Acc, load);
         break;
       }
-
+      case INS_LDA_ABS_Y:
+      {
+        Word addr_absolute = fetch_word(cpu, cycles);
+        // Test if we cross a page boundary (Higher byte after addition is different) and consume a cycle
+        if(((addr_absolute >> 4) ^ ((addr_absolute + cpu->X) >> 4)))
+        {
+          *(cycles) = *(cycles) - 1;
+        }
+        addr_absolute += cpu->Y;       
+        Byte load = read_byte(cpu, cycles, addr_absolute);
+        load_to_register(cpu, &cpu->Acc, load);
+        break;
+      }
 
       default:
         printf("Found instruction %x, not implemented! Returning from execution\n", instruction);
