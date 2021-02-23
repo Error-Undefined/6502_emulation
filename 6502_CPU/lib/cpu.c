@@ -164,6 +164,18 @@ void execute(struct cpu_struct *cpu, s32* cycles)
         load_to_register(cpu, &cpu->Acc, load);
         break;
       }
+      case INS_LDA_IND_X:
+      {
+        Byte addr_indirect = fetch_byte(cpu, cycles);
+        
+        addr_indirect = (cpu->X + addr_indirect) & 0xFF; // Wrap around at 0xFF
+        //Consume three cycles (read X, add and and)
+        *(cycles) = *(cycles) - 3;
+
+        Byte load = read_byte(cpu, cycles, addr_indirect);        
+        load_to_register(cpu, &cpu->Acc, load);
+        break;
+      }
 
       default:
         printf("Found instruction %x, not implemented! Returning from execution\n", instruction);
