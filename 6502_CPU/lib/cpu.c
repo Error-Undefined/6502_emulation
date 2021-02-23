@@ -125,6 +125,7 @@ void execute(struct cpu_struct *cpu, s32* cycles)
         Byte addr_in_zp = fetch_byte(cpu, cycles);
         
         addr_in_zp += cpu->X;
+        addr_in_zp &= 0xFF;
         *(cycles) = *(cycles) - 1; // Consume an extra cycle
 
         Byte load = read_byte(cpu, cycles, addr_in_zp);
@@ -208,6 +209,7 @@ void execute(struct cpu_struct *cpu, s32* cycles)
         Byte addr_in_zp = fetch_byte(cpu, cycles);
         
         addr_in_zp += cpu->Y;
+        addr_in_zp &= 0xFF;
         *(cycles) = *(cycles) - 1; // Consume an extra cycle
 
         Byte load = read_byte(cpu, cycles, addr_in_zp);
