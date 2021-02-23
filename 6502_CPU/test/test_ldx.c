@@ -122,7 +122,7 @@ static char* test_ldx_abs_y()
 
   //Run
   execute(cpu, &cycles);
-  
+
   //Expect
   mu_assert("X register loaded wrong value", cpu->X == value);
   mu_assert("LDX_ABS_Y did not consume exactly 4 cycles", cycles == 0);
@@ -142,7 +142,7 @@ static char* test_ldx_abs_y_page_cross()
   Byte higher_address = absolute_addr >> 8;
 
   //Given
-  memory->memory_array[0xFFFC] = INS_LDX_ABS;
+  memory->memory_array[0xFFFC] = INS_LDX_ABS_Y;
   memory->memory_array[0xFFFD] = lower_address;
   memory->memory_array[0xFFFE] = higher_address;
   memory->memory_array[absolute_addr + cpu->Y] = value;
