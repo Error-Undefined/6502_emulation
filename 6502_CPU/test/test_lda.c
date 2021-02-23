@@ -23,8 +23,8 @@ static void test_lda_zp_setup(Instruction_Type instruction, Byte jump_to_zeropag
 {
   //Using
   memory->memory_array[0xFFFC] = instruction;
-  memory->memory_array[0xFFFD] = jump_to_zeropage;
-  memory->memory_array[jump_to_zeropage] = value_in_zeropage;
+  memory->memory_array[0xFFFD] = jump_to_zeropage + cpu->X;
+  memory->memory_array[jump_to_zeropage + cpu->X] = value_in_zeropage;
 
   execute(cpu, cycles);
 }
@@ -94,6 +94,18 @@ static char* test_lda_zp()
   return 0;
 }
 
+static char* test_lda_zp_x()
+{
+  //Setup and run
+  s32 cycles = 4;
+  Byte value = 0x15;
+  cpu->X = 0x3; // Put 3 in X register for ZP-X
+  test_lda_zp_setup(INS_LDA_ZP_X, 0x10, value, &cycles);
+
+  mu_assert("Accumulator loaded wrong value", cpu->Acc == value);
+  mu_assert("LDA_ZP_X did not consume exactly 5 cycles", cycles == 0);
+  return 0;
+}
 
 static char* all_lda_test()
 {
@@ -112,6 +124,9 @@ static char* all_lda_test()
 
   before();
   mu_run_test(test_lda_zp);
+
+  before();
+  mu_run_test(test_lda_zp_x);
 
   return 0;
 }
