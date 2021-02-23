@@ -155,7 +155,7 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       {
         Word addr_absolute = fetch_word(cpu, cycles);
         // Test if we cross a page boundary (Higher byte after addition is different) and consume a cycle
-        if(((addr_absolute >> 4) ^ ((addr_absolute + cpu->X) >> 4)))
+        if(((addr_absolute >> 8) ^ ((addr_absolute + cpu->X) >> 8)))
         {
           *(cycles) = *(cycles) - 1;
         }
@@ -188,6 +188,50 @@ void execute(struct cpu_struct *cpu, s32* cycles)
         }
         Byte load = read_byte(cpu, cycles, addr_indirect);
         load_to_register(cpu, &cpu->Acc, load);
+        break;
+      }
+      case INS_LDX_IM:
+      {
+        Byte load = fetch_byte(cpu, cycles);
+        load_to_register(cpu, &cpu->X, load);
+        break;
+      }
+      case INS_LDX_ZP:
+      {
+        Byte addr_in_zp = fetch_byte(cpu, cycles);
+        Byte load = read_byte(cpu, cycles, addr_in_zp);
+        load_to_register(cpu, &cpu->X, load);
+        break;
+      }
+      case INS_LDX_ZP_Y:
+      {
+        Byte addr_in_zp = fetch_byte(cpu, cycles);
+        
+        addr_in_zp += cpu->Y;
+        *(cycles) = *(cycles) - 1; // Consume an extra cycle
+
+        Byte load = read_byte(cpu, cycles, addr_in_zp);
+        load_to_register(cpu, &cpu->X, load);
+        break;
+      }
+      case INS_LDX_ABS:
+      {
+        Word addr_absolute = fetch_word(cpu, cycles);
+        Byte load = read_byte(cpu, cycles, addr_absolute);
+        load_to_register(cpu, &cpu->X, load);
+        break;
+      }
+      case INS_LDX_ABS_Y:
+      {
+        Word addr_absolute = fetch_word(cpu, cycles);
+        // Test if we cross a page boundary (Higher byte after addition is different) and consume a cycle
+        if(((addr_absolute >> 8) ^ ((addr_absolute + cpu->Y) >> 8)))
+        {
+          *(cycles) = *(cycles) - 1;
+        }
+        addr_absolute += cpu->Y;       
+        Byte load = read_byte(cpu, cycles, addr_absolute);
+        load_to_register(cpu, &cpu->X, load);
         break;
       }
 
