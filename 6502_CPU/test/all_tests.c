@@ -9,9 +9,11 @@ int main()
   struct cpu_struct cpu;
   struct memory_struct memory;
 
-  printf("Running LDA test..\n");
+  printf("Running LDA test...\n");
   run_all_lda_test(&cpu, &memory);
 
+  printf("Running LDX test...\n");
+  run_all_ldx_test(&cpu, &memory);
 
 
   printf("End test suite\n");

@@ -304,12 +304,11 @@ int run_all_lda_test(struct cpu_struct* cpu_in, struct memory_struct* memory_in)
   if(msg != 0)
   {
     printf("%s\n", msg);
-    fprintf(stderr,"Not all tests passed\n");
+    fprintf(stderr,"Not all LDA tests passed\n");
+    return -1;
   }
-  else
-  {
-    printf("All LDA test passed\n");
-  }
+
+  printf("All LDA test passed\n");
 
   return 0;
 }
