@@ -97,6 +97,56 @@ void load_to_register(struct cpu_struct* cpu, Byte* register_to_load, Byte value
 }
 
 // Addressing modes
+Byte address_zero_page(struct cpu_struct* cpu, s32* cycles)
+{
+  Byte address_in_zp = fetch_byte(cpu, cycles);
+  return address_in_zp;
+}
+
+
+Byte address_zero_page_x(struct cpu_struct* cpu, s32* cycles)
+{
+  Byte address_in_zp = fetch_byte(cpu, cycles);
+  address_in_zp = (address_in_zp + cpu->X) & 0xFF;
+  *(cycles) = *(cycles) - 1;
+  return address_in_zp;
+}
+
+
+Byte address_zero_page_y(struct cpu_struct* cpu, s32* cycles)
+{
+  Byte address_in_zp = fetch_byte(cpu, cycles);
+  address_in_zp = (address_in_zp + cpu->Y) & 0xFF;
+  *(cycles) = *(cycles) - 1;
+  return address_in_zp;
+}
+
+/*
+Word address_absolute(struct cpu_struct* cpu, s32* cycles)
+{
+
+}
+
+Word address_absolute_x(struct cpu_struct* cpu, s32* cycles)
+{
+
+}
+
+Word address_absolute_y(struct cpu_struct* cpu, s32* cycles)
+{
+
+}
+
+Word address_indexed_indirect(struct cpu_struct* cpu, s32* cycles)
+{
+
+}
+
+Word address_indirect_indexed(struct cpu_struct* cpu, s32* cycles)
+{
+
+}
+*/
 
 void execute(struct cpu_struct *cpu, s32* cycles)
 { 
@@ -116,19 +166,14 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       }
       case INS_LDA_ZP:
       {
-        Byte addr_in_zp = fetch_byte(cpu, cycles);
+        Byte addr_in_zp = address_zero_page(cpu, cycles);
         Byte load = read_byte(cpu, cycles, addr_in_zp);
         load_to_register(cpu, &cpu->Acc, load);
         break;
       }
       case INS_LDA_ZP_X:
       {
-        Byte addr_in_zp = fetch_byte(cpu, cycles);
-        
-        addr_in_zp += cpu->X;
-        addr_in_zp &= 0xFF;
-        *(cycles) = *(cycles) - 1; // Consume an extra cycle
-
+        Byte addr_in_zp = address_zero_page_x(cpu, cycles);
         Byte load = read_byte(cpu, cycles, addr_in_zp);
         load_to_register(cpu, &cpu->Acc, load);
         break;
@@ -200,17 +245,14 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       }
       case INS_LDX_ZP:
       {
-        Byte addr_in_zp = fetch_byte(cpu, cycles);
+        Byte addr_in_zp = address_zero_page(cpu, cycles);
         Byte load = read_byte(cpu, cycles, addr_in_zp);
         load_to_register(cpu, &cpu->X, load);
         break;
       }
       case INS_LDX_ZP_Y:
       {
-        Byte addr_in_zp = fetch_byte(cpu, cycles);
-        addr_in_zp += cpu->Y;
-        addr_in_zp &= 0xFF;
-        *(cycles) = *(cycles) - 1; // Consume an extra cycle
+        Byte addr_in_zp = address_zero_page_y(cpu, cycles);
         Byte load = read_byte(cpu, cycles, addr_in_zp);
         load_to_register(cpu, &cpu->X, load);
         break;
@@ -244,19 +286,14 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       }
       case INS_LDY_ZP:
       {
-        Byte addr_in_zp = fetch_byte(cpu, cycles);
+        Byte addr_in_zp = address_zero_page(cpu, cycles);
         Byte load = read_byte(cpu, cycles, addr_in_zp);
         load_to_register(cpu, &cpu->Y, load);
         break;
       }
       case INS_LDY_ZP_X:
       {
-        Byte addr_in_zp = fetch_byte(cpu, cycles);
-        
-        addr_in_zp += cpu->X;
-        addr_in_zp &= 0xFF;
-        *(cycles) = *(cycles) - 1; // Consume an extra cycle
-
+        Byte addr_in_zp = address_zero_page_x(cpu, cycles);
         Byte load = read_byte(cpu, cycles, addr_in_zp);
         load_to_register(cpu, &cpu->Y, load);
         break;
@@ -284,15 +321,13 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       //--STA--
       case INS_STA_ZP:
       {
-        Byte addr_in_zp = fetch_byte(cpu, cycles);
+        Byte addr_in_zp = address_zero_page(cpu, cycles);
         write_byte(cpu, cycles, addr_in_zp, cpu->Acc);
         break;
       }
       case INS_STA_ZP_X:
       {
-        Byte addr_in_zp = fetch_byte(cpu, cycles);
-        addr_in_zp = (addr_in_zp + cpu->X) & 0xFF;
-        *(cycles) = *(cycles) - 1;
+        Byte addr_in_zp = address_zero_page_x(cpu, cycles);
         write_byte(cpu, cycles, addr_in_zp, cpu->Acc);
         break;
       }
