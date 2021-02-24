@@ -197,7 +197,7 @@ void execute(struct cpu_struct *cpu, s32* cycles)
     Byte instruction = fetch_byte(cpu, cycles);
     switch (instruction)
     {
-      //--LDA--
+      //--LDA--//
       case INS_LDA_IM:
       {
         Byte load = fetch_byte(cpu, cycles);
@@ -253,7 +253,7 @@ void execute(struct cpu_struct *cpu, s32* cycles)
         load_to_register(cpu, &cpu->Acc, value);
         break;
       }
-      //--LDX--
+      //--LDX--//
       case INS_LDX_IM:
       {
         Byte load = fetch_byte(cpu, cycles);
@@ -288,7 +288,7 @@ void execute(struct cpu_struct *cpu, s32* cycles)
         load_to_register(cpu, &cpu->X, load);
         break;
       }
-      //--LDY--
+      //--LDY--//
       case INS_LDY_IM:
       {
         Byte load = fetch_byte(cpu, cycles);
@@ -323,7 +323,7 @@ void execute(struct cpu_struct *cpu, s32* cycles)
         load_to_register(cpu, &cpu->Y, load);
         break;
       }
-      //--STA--
+      //--STA--//
       case INS_STA_ZP:
       {
         Byte addr_in_zp = address_zero_page(cpu, cycles);
@@ -366,6 +366,14 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       {
         Word addr_indirect_word = address_indirect_indexed(cpu, cycles, 0);
         write_byte(cpu, cycles, addr_indirect_word, cpu->Acc);
+        consume_cycle(cycles);
+        break;
+      }
+
+
+      //--System instructions--//
+      case INS_NOP:
+      {
         consume_cycle(cycles);
         break;
       }

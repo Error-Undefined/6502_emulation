@@ -10,6 +10,7 @@ void before()
 
 static char* test_nop()
 {
+  start_test_info();
   //Given
   s32 cycles = 4;
 
@@ -22,7 +23,7 @@ static char* test_nop()
 
   //Expect
   mu_assert("Two NOP should consume 4 cycles", cycles == 0);
-  
+
 
   return 0;
 }
