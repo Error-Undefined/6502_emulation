@@ -166,29 +166,28 @@ void execute(struct cpu_struct *cpu, s32* cycles)
         break;
       }
       case INS_LDA_IND_X:
-      {
-        Word addr_indirect = fetch_byte(cpu, cycles);
-        addr_indirect = (cpu->X + addr_indirect) & 0xFF; // Wrap around at 0xFF
-        //Consume three cycles (read X, add, and)
-        *(cycles) = *(cycles) - 3;
-
-        Byte load = read_byte(cpu, cycles, addr_indirect);        
-        load_to_register(cpu, &cpu->Acc, load);
+      {        
+        Byte address_ind = fetch_byte(cpu, cycles);
+        //Wrap to zero page and consume a cycle
+        address_ind = (address_ind + cpu->X) & 0xFF;
+        *(cycles) = *(cycles) - 1;
+        Word value_address = read_word(cpu, cycles, address_ind);
+        Byte value = read_byte(cpu, cycles, value_address);
+        load_to_register(cpu, &cpu->Acc, value);
         break;
       }
       case INS_LDA_IND_Y:
       {
-        Word addr_indirect = fetch_byte(cpu, cycles);
-        addr_indirect = addr_indirect + cpu->Y;
-        //Consume two cycles (read Y, add)
-        *(cycles) = *(cycles) - 2;
-        // Test if we cross a page boundary (Higher byte after addition is not 0) and consume a cycle
-        if(addr_indirect & 0xFF00)
+        Byte address_ind = fetch_byte(cpu, cycles); 
+        Word address_from_zp = read_word(cpu, cycles, address_ind);
+        //Add Y register. Test if we cross a page boundary and then consume an extra cycle
+        if(((address_from_zp >> 8) ^ ((address_from_zp + cpu->Y) >> 8)))
         {
           *(cycles) = *(cycles) - 1;
         }
-        Byte load = read_byte(cpu, cycles, addr_indirect);
-        load_to_register(cpu, &cpu->Acc, load);
+        address_from_zp = address_from_zp + cpu->Y;
+        Byte value = read_byte(cpu, cycles, address_from_zp);
+        load_to_register(cpu, &cpu->Acc, value);
         break;
       }
       //--LDX--
@@ -208,11 +207,9 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       case INS_LDX_ZP_Y:
       {
         Byte addr_in_zp = fetch_byte(cpu, cycles);
-        
         addr_in_zp += cpu->Y;
         addr_in_zp &= 0xFF;
         *(cycles) = *(cycles) - 1; // Consume an extra cycle
-
         Byte load = read_byte(cpu, cycles, addr_in_zp);
         load_to_register(cpu, &cpu->X, load);
         break;
@@ -235,7 +232,6 @@ void execute(struct cpu_struct *cpu, s32* cycles)
         addr_absolute += cpu->Y;       
         Byte load = read_byte(cpu, cycles, addr_absolute);
         load_to_register(cpu, &cpu->X, load);
-        printf("Cycles: %d\n", *cycles);
         break;
       }
       //--LDY--
@@ -282,12 +278,11 @@ void execute(struct cpu_struct *cpu, s32* cycles)
         addr_absolute += cpu->X;       
         Byte load = read_byte(cpu, cycles, addr_absolute);
         load_to_register(cpu, &cpu->Y, load);
-        printf("Cycles: %d\n", *cycles);
         break;
       }
 
       default:
-        printf("Found instruction %x, not implemented! Returning from execution\n", instruction);
+        printf("Found instruction 0x%x, not implemented! Returning from execution\n", instruction);
         return;
         break;
     }

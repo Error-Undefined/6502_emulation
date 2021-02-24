@@ -186,11 +186,17 @@ static char* test_lda_ind_x()
   Byte value = 0xA4;
   Byte indirect_address = 0x60;
   cpu->X = 0x30;
+
+  Byte lower_address = 0x14;
+  Byte higher_address = 0x20;
+  Word final_address = 0x2014;
   
   //Set up memory
   memory->memory_array[0xFFFC] = INS_LDA_IND_X;
   memory->memory_array[0xFFFD] = indirect_address;
-  memory->memory_array[0x90] = value;
+  memory->memory_array[0x90] = lower_address;
+  memory->memory_array[0x91] = higher_address;
+  memory->memory_array[final_address] = value;
 
   //Execute
   execute(cpu, &cycles);
@@ -211,10 +217,16 @@ static char* test_lda_ind_x_with_wrap()
   Byte indirect_address = 0xFF;
   cpu->X = 0x30;
 
+  Byte lower_address = 0x11;
+  Byte higher_address = 0x30;
+  Word final_address = 0x3011;
+
   //Set up memory
   memory->memory_array[0xFFFC] = INS_LDA_IND_X;
   memory->memory_array[0xFFFD] = indirect_address;
-  memory->memory_array[0x2F] = value; // Wrap around at the end of the zero page
+  memory->memory_array[0x2F] = lower_address; // Wrap around at the end of the zero page
+  memory->memory_array[0x30] = higher_address;
+  memory->memory_array[final_address] = value;
 
   //Execute
   execute(cpu, &cycles);
@@ -235,10 +247,16 @@ static char* test_lda_ind_y()
   Byte indirect_address = 0x12;
   cpu->Y = 0x15;
 
+  Byte lower_address = 0x43;
+  Byte upper_address = 0x50;
+  Word final_address = 0x5043 + 0x15; //Add Y to the fetched address
+
   //Set up memory
   memory->memory_array[0xFFFC] = INS_LDA_IND_Y;
   memory->memory_array[0xFFFD] = indirect_address;
-  memory->memory_array[0x27] = value; 
+  memory->memory_array[0x12] = lower_address;
+  memory->memory_array[0x13] = upper_address;
+  memory->memory_array[final_address] = value; 
 
   //Execute
   execute(cpu, &cycles);
@@ -257,13 +275,20 @@ static char* test_lda_ind_y_crosses_page()
   //Given
   s32 cycles = 6;
   Byte value = 0xEE;
-  Byte indirect_address = 0xff;
-  cpu->Y = 0x18;
+  Byte indirect_address = 0x16;
+  cpu->Y = 0x19;
+
+  Byte lower_address = 0xe7;
+  Byte upper_address = 0x21;
+
+  Word final_address = 0x2200; //(Indirect address + Y register)
 
   //Set up memory
   memory->memory_array[0xFFFC] = INS_LDA_IND_Y;
   memory->memory_array[0xFFFD] = indirect_address;
-  memory->memory_array[0x117] = value; 
+  memory->memory_array[indirect_address] = lower_address;
+  memory->memory_array[indirect_address + 1] = upper_address; 
+  memory->memory_array[final_address] = value;
 
   //Execute
   execute(cpu, &cycles);
@@ -327,7 +352,7 @@ int run_all_lda_test(struct cpu_struct* cpu_in, struct memory_struct* memory_in)
   if(msg != 0)
   {
     printf("%s\n", msg);
-    fprintf(stderr,"Not all LDA tests passed\n");
+    fprintf(stderr,"Not all LDA tests passed\n--------\n");
     return -1;
   }
 
