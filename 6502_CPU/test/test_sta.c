@@ -78,7 +78,7 @@ static char* test_sta_zp_x_wraps()
   execute(cpu, &cycles);
 
   //Assert
-  mu_assert("STA_ZP did not consume exactly 4 cycles", cycles == 4);
+  mu_assert("STA_ZP did not consume exactly 4 cycles", cycles == 0);
   //0x13 as 0xFE + 0x15 = 0x113
   mu_assert("Value was not loaded to memory with zero page wrap", memory->memory_array[0x13] == value);
 
@@ -125,7 +125,7 @@ static char* test_sta_abs_x()
   Byte x_offset = 0xA1;
 
   //Setup
-  memory->memory_array[0xFFFC] = INS_STA_ABS;
+  memory->memory_array[0xFFFC] = INS_STA_ABS_X;
   memory->memory_array[0xFFFD] = lower_address;
   memory->memory_array[0xFFFE] = higher_address;
   cpu->Acc = value;
@@ -154,7 +154,7 @@ static char* test_sta_abs_y()
   Byte y_offset = 0x21;
 
   //Setup
-  memory->memory_array[0xFFFC] = INS_STA_ABS;
+  memory->memory_array[0xFFFC] = INS_STA_ABS_Y;
   memory->memory_array[0xFFFD] = lower_address;
   memory->memory_array[0xFFFE] = higher_address;
   cpu->Acc = value;
