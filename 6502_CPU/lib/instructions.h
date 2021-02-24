@@ -38,7 +38,12 @@ enum Instruction
   INS_STA_ABS_X = 0x9D,
   INS_STA_ABS_Y = 0x99,
   INS_STA_IND_X = 0x81,
-  INS_STA_IND_Y = 0x91
+  INS_STA_IND_Y = 0x91,
+
+  
+
+  // NOP
+  INS_NOP = 0xEA
 };
 
 #endif

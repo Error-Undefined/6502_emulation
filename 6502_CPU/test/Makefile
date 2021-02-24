@@ -16,7 +16,7 @@ LDFLAGS = -g
 PROGS = all_tests
 all: $(PROGS)
 
-TESTS = test_lda.o test_ldx_ldy.o test_sta.o
+TESTS = test_lda.o test_ldx_ldy.o test_sta.o test_sys.o
 
 # Targets rely on implicit rules for compiling and linking
 all_tests: all_tests.o ../lib/cpu.o ../lib/memory.o $(TESTS)
