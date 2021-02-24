@@ -388,6 +388,25 @@ void execute(struct cpu_struct *cpu, s32* cycles)
         write_byte(cpu, cycles, addr_absolute, cpu->X);
         break;
       }
+      //--STY--//
+      case INS_STY_ZP:
+      {
+        Byte addr_zeropage = address_zero_page(cpu, cycles);
+        write_byte(cpu, cycles, addr_zeropage, cpu->Y);
+        break;
+      }
+      case INS_STY_ZP_X:
+      {
+        Byte addr_zeropage = address_zero_page_x(cpu, cycles);
+        write_byte(cpu, cycles, addr_zeropage, cpu->Y);
+        break;
+      }
+      case INS_STY_ABS:
+      {
+        Word addr_absolute = address_absolute(cpu, cycles);
+        write_byte(cpu, cycles, addr_absolute, cpu->Y);
+        break;
+      }
 
 
       //--System instructions--//

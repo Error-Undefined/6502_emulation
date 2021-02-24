@@ -96,7 +96,7 @@ static char* test_sty_zp()
   Byte zeropage_address = 0x2A;
 
   //Setup
-  memory->memory_array[0xFFFC] = INS_STX_ZP;
+  memory->memory_array[0xFFFC] = INS_STY_ZP;
   memory->memory_array[0xFFFD] = zeropage_address;
   cpu->Y = value;
 
