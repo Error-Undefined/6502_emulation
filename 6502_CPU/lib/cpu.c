@@ -37,13 +37,18 @@ void reset_cpu_word(struct cpu_struct* cpu, struct memory_struct* memory, Word r
   initialize_memory(memory);
 }
 
+// Consumes a cycle from the clock
+void consume_cycle(s32* cycles)
+{
+  *(cycles) = *(cycles) - 1;
+}
 
 // Fetch operations
 Byte fetch_byte(struct cpu_struct *cpu, s32* cycles)
 {
   Byte to_fetch = cpu->memory_bus->memory_array[cpu->PC];
   ++cpu->PC;
-  *(cycles) = *(cycles) - 1;
+  consume_cycle(cycles);
   return to_fetch;
 }
 
@@ -61,7 +66,7 @@ Word fetch_word(struct cpu_struct *cpu, s32* cycles)
 Byte read_byte(struct cpu_struct *cpu, s32* cycles, Word address)
 {
   Byte to_read = cpu->memory_bus->memory_array[address];
-  *(cycles) = *(cycles) - 1;
+  consume_cycle(cycles);
   return to_read;
 }
 
@@ -78,7 +83,7 @@ Word read_word(struct cpu_struct *cpu, s32* cycles, Word address)
 void write_byte(struct cpu_struct *cpu, s32* cycles, Word address, Byte value)
 {
   cpu->memory_bus->memory_array[address] = value;
-  *(cycles) = *(cycles) - 1;
+  consume_cycle(cycles);
 }
 
 void write_word(struct cpu_struct *cpu, s32* cycles, Word address, Word value)
@@ -96,57 +101,92 @@ void load_to_register(struct cpu_struct* cpu, Byte* register_to_load, Byte value
   cpu->status_flags.N = (value >> 6);
 }
 
-// Addressing modes
+/* Addressing modes */
+
+//Consumes 1 clock cycle
 Byte address_zero_page(struct cpu_struct* cpu, s32* cycles)
 {
   Byte address_in_zp = fetch_byte(cpu, cycles);
   return address_in_zp;
 }
 
-
+// Consumes 2 clock cycles
 Byte address_zero_page_x(struct cpu_struct* cpu, s32* cycles)
 {
   Byte address_in_zp = fetch_byte(cpu, cycles);
   address_in_zp = (address_in_zp + cpu->X) & 0xFF;
-  *(cycles) = *(cycles) - 1;
+  consume_cycle(cycles);
   return address_in_zp;
 }
 
-
+// Consumes 2 clock cycles
 Byte address_zero_page_y(struct cpu_struct* cpu, s32* cycles)
 {
   Byte address_in_zp = fetch_byte(cpu, cycles);
   address_in_zp = (address_in_zp + cpu->Y) & 0xFF;
-  *(cycles) = *(cycles) - 1;
+  consume_cycle(cycles);
   return address_in_zp;
 }
 
-/*
+// Consumes 2 clock cycles
 Word address_absolute(struct cpu_struct* cpu, s32* cycles)
 {
-
+  Word address_absolute = fetch_word(cpu, cycles);
+  return address_absolute;
 }
 
-Word address_absolute_x(struct cpu_struct* cpu, s32* cycles)
+// Consumes 2 clock cycles, or 3 if check_page_bounds is set and a page bound is crossed
+Word address_absolute_x(struct cpu_struct* cpu, s32* cycles, int check_page_bounds)
 {
-
+  Word addr_absolute = fetch_word(cpu, cycles);
+  // Test if we cross a page boundary (Higher byte after addition is different) and consume a cycle
+  if(check_page_bounds && ((addr_absolute >> 8) ^ ((addr_absolute + cpu->X) >> 8)))
+  {
+    consume_cycle(cycles);
+  }
+  addr_absolute += cpu->X;
+  return addr_absolute;
 }
 
-Word address_absolute_y(struct cpu_struct* cpu, s32* cycles)
+// Consumes 2 clock cycles, or 3 if check_page_bounds is set and a page bound is crossed
+Word address_absolute_y(struct cpu_struct* cpu, s32* cycles, int check_page_bounds)
 {
-
+  Word addr_absolute = fetch_word(cpu, cycles);
+  // Test if we cross a page boundary (Higher byte after addition is different) and consume a cycle
+  if(check_page_bounds && ((addr_absolute >> 8) ^ ((addr_absolute + cpu->Y) >> 8)))
+  {
+    consume_cycle(cycles);
+  }
+  addr_absolute += cpu->Y;
+  return addr_absolute;
 }
 
+// Indexed indirect always with X register. 
+// Consumes 4 clock cycles.
 Word address_indexed_indirect(struct cpu_struct* cpu, s32* cycles)
 {
-
+  Byte address_ind = fetch_byte(cpu, cycles);
+  //Wrap to zero page and consume a cycle
+  address_ind = (address_ind + cpu->X) & 0xFF;
+  consume_cycle(cycles);
+  Word value_address = read_word(cpu, cycles, address_ind);
+  return value_address;
 }
 
-Word address_indirect_indexed(struct cpu_struct* cpu, s32* cycles)
+// Indirect indexed always with Y register. 
+// Consumes 3 clock cycles, or 4 if check_page_bounds is set and a page bound is crossed 
+Word address_indirect_indexed(struct cpu_struct* cpu, s32* cycles, int check_page_boundary)
 {
-
+  Byte address_ind = fetch_byte(cpu, cycles); 
+  Word address_from_zp = read_word(cpu, cycles, address_ind);
+  //Add Y register. Test if we cross a page boundary and then consume an extra cycle
+  if(((address_from_zp >> 8) ^ ((address_from_zp + cpu->Y) >> 8)))
+  {
+    consume_cycle(cycles);
+  }
+  address_from_zp = address_from_zp + cpu->Y;
+  return address_from_zp;
 }
-*/
 
 void execute(struct cpu_struct *cpu, s32* cycles)
 { 
@@ -180,58 +220,35 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       }
       case INS_LDA_ABS:
       {
-        Word addr_absolute = fetch_word(cpu, cycles);
+        Word addr_absolute = address_absolute(cpu, cycles);
         Byte load = read_byte(cpu, cycles, addr_absolute);
         load_to_register(cpu, &cpu->Acc, load);
         break;
       }
       case INS_LDA_ABS_X:
       {
-        Word addr_absolute = fetch_word(cpu, cycles);
-        // Test if we cross a page boundary (Higher byte after addition is different) and consume a cycle
-        if(((addr_absolute >> 4) ^ ((addr_absolute + cpu->X) >> 4)))
-        {
-          *(cycles) = *(cycles) - 1;
-        }
-        addr_absolute += cpu->X;       
+        Word addr_absolute = address_absolute_x(cpu, cycles, 1);   
         Byte load = read_byte(cpu, cycles, addr_absolute);
         load_to_register(cpu, &cpu->Acc, load);
         break;
       }
       case INS_LDA_ABS_Y:
       {
-        Word addr_absolute = fetch_word(cpu, cycles);
-        // Test if we cross a page boundary (Higher byte after addition is different) and consume a cycle
-        if(((addr_absolute >> 8) ^ ((addr_absolute + cpu->X) >> 8)))
-        {
-          *(cycles) = *(cycles) - 1;
-        }
-        addr_absolute += cpu->Y;       
+        Word addr_absolute = address_absolute_y(cpu, cycles, 1);      
         Byte load = read_byte(cpu, cycles, addr_absolute);
         load_to_register(cpu, &cpu->Acc, load);
         break;
       }
       case INS_LDA_IND_X:
       {        
-        Byte address_ind = fetch_byte(cpu, cycles);
-        //Wrap to zero page and consume a cycle
-        address_ind = (address_ind + cpu->X) & 0xFF;
-        *(cycles) = *(cycles) - 1;
-        Word value_address = read_word(cpu, cycles, address_ind);
-        Byte value = read_byte(cpu, cycles, value_address);
+        Word address = address_indexed_indirect(cpu, cycles);
+        Byte value = read_byte(cpu, cycles, address);
         load_to_register(cpu, &cpu->Acc, value);
         break;
       }
       case INS_LDA_IND_Y:
       {
-        Byte address_ind = fetch_byte(cpu, cycles); 
-        Word address_from_zp = read_word(cpu, cycles, address_ind);
-        //Add Y register. Test if we cross a page boundary and then consume an extra cycle
-        if(((address_from_zp >> 8) ^ ((address_from_zp + cpu->Y) >> 8)))
-        {
-          *(cycles) = *(cycles) - 1;
-        }
-        address_from_zp = address_from_zp + cpu->Y;
+        Word address_from_zp = address_indirect_indexed(cpu, cycles, 1);
         Byte value = read_byte(cpu, cycles, address_from_zp);
         load_to_register(cpu, &cpu->Acc, value);
         break;
@@ -259,20 +276,14 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       }
       case INS_LDX_ABS:
       {
-        Word addr_absolute = fetch_word(cpu, cycles);
+        Word addr_absolute = address_absolute(cpu, cycles);
         Byte load = read_byte(cpu, cycles, addr_absolute);
         load_to_register(cpu, &cpu->X, load);
         break;
       }
       case INS_LDX_ABS_Y:
       {
-        Word addr_absolute = fetch_word(cpu, cycles);
-        // Test if we cross a page boundary (Higher byte after addition is different) and consume a cycle
-        if(((addr_absolute >> 8) ^ ((addr_absolute + cpu->Y) >> 8)))
-        {
-          *(cycles) = *(cycles) - 1;
-        }
-        addr_absolute += cpu->Y;       
+        Word addr_absolute = address_absolute_y(cpu, cycles, 1);      
         Byte load = read_byte(cpu, cycles, addr_absolute);
         load_to_register(cpu, &cpu->X, load);
         break;
@@ -300,20 +311,14 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       }
       case INS_LDY_ABS:
       {
-        Word addr_absolute = fetch_word(cpu, cycles);
+        Word addr_absolute = address_absolute(cpu, cycles);
         Byte load = read_byte(cpu, cycles, addr_absolute);
         load_to_register(cpu, &cpu->Y, load);
         break;
       }
       case INS_LDY_ABS_X:
       {
-        Word addr_absolute = fetch_word(cpu, cycles);
-        // Test if we cross a page boundary (Higher byte after addition is different) and consume a cycle
-        if(((addr_absolute >> 8) ^ ((addr_absolute + cpu->X) >> 8)))
-        {
-          *(cycles) = *(cycles) - 1;
-        }
-        addr_absolute += cpu->X;       
+        Word addr_absolute = address_absolute_x(cpu, cycles, 1);     
         Byte load = read_byte(cpu, cycles, addr_absolute);
         load_to_register(cpu, &cpu->Y, load);
         break;
@@ -333,42 +338,35 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       }
       case INS_STA_ABS:
       {
-        Word addr_absolute = fetch_word(cpu, cycles);
+        Word addr_absolute = address_absolute(cpu, cycles);
         write_byte(cpu, cycles, addr_absolute, cpu->Acc);
         break;
       }
       case INS_STA_ABS_X:
       {
-        Word addr_absolute = fetch_word(cpu, cycles);
-        addr_absolute = addr_absolute + cpu->X;
-        *(cycles) = *(cycles) - 1;
+        Word addr_absolute = address_absolute_x(cpu, cycles, 0);
         write_byte(cpu, cycles, addr_absolute, cpu->Acc);
+        consume_cycle(cycles);
         break;
       }
       case INS_STA_ABS_Y:
       {
-        Word addr_absolute = fetch_word(cpu, cycles);
-        addr_absolute = addr_absolute + cpu->Y;
-        *(cycles) = *(cycles) - 1;
+        Word addr_absolute = address_absolute_y(cpu, cycles, 0);
         write_byte(cpu, cycles, addr_absolute, cpu->Acc);
+        consume_cycle(cycles);
         break;
       }
       case INS_STA_IND_X:
       {
-        Byte addr_indirect_zp = fetch_byte(cpu, cycles);
-        addr_indirect_zp = (addr_indirect_zp + cpu->X) & 0xFF;
-        *(cycles) = *(cycles) - 1;
-        Word value_address = read_word(cpu, cycles, addr_indirect_zp);
+        Word value_address = address_indexed_indirect(cpu, cycles);
         write_byte(cpu, cycles, value_address, cpu->Acc);
         break;
       }
       case INS_STA_IND_Y:
       {
-        Byte addr_indirect_zp = fetch_byte(cpu, cycles);
-        Word addr_indirect_word = read_word(cpu, cycles, addr_indirect_zp);
-        addr_indirect_word = addr_indirect_word + cpu->Y;
-        *(cycles) = *(cycles) - 1; 
+        Word addr_indirect_word = address_indirect_indexed(cpu, cycles, 0);
         write_byte(cpu, cycles, addr_indirect_word, cpu->Acc);
+        consume_cycle(cycles);
         break;
       }
 
