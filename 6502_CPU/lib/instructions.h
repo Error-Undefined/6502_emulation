@@ -40,7 +40,15 @@ enum Instruction
   INS_STA_IND_X = 0x81,
   INS_STA_IND_Y = 0x91,
 
-  
+  //STX
+  INS_STX_ZP = 0x86,
+  INS_STX_ZP_Y = 0x96,
+  INS_STX_ABS = 0x8E,
+
+  //STY
+  INS_STY_ZP = 0x84,
+  INS_STY_ZP_X = 0x94,
+  INS_STY_ABS = 0x8C,
 
   // NOP
   INS_NOP = 0xEA
