@@ -369,6 +369,25 @@ void execute(struct cpu_struct *cpu, s32* cycles)
         consume_cycle(cycles);
         break;
       }
+      //--STX--//
+      case INS_STX_ZP:
+      {
+        Byte addr_zeropage = address_zero_page(cpu, cycles);
+        write_byte(cpu, cycles, addr_zeropage, cpu->X);
+        break;
+      }
+      case INS_STX_ZP_Y:
+      {
+        Byte addr_zeropage = address_zero_page_y(cpu, cycles);
+        write_byte(cpu, cycles, addr_zeropage, cpu->X);
+        break;
+      }
+      case INS_STX_ABS:
+      {
+        Word addr_absolute = address_absolute(cpu, cycles);
+        write_byte(cpu, cycles, addr_absolute, cpu->X);
+        break;
+      }
 
 
       //--System instructions--//

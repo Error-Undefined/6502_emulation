@@ -44,7 +44,7 @@ static char* test_stx_zp_y()
   Byte final_address = zeropage_address + y_register_offset;
 
   //Setup
-  memory->memory_array[0xFFFC] = INS_STX_ZP;
+  memory->memory_array[0xFFFC] = INS_STX_ZP_Y;
   memory->memory_array[0xFFFD] = zeropage_address;
   cpu->X = value;
   cpu->Y = y_register_offset;
