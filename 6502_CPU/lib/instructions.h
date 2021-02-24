@@ -29,7 +29,16 @@ enum Instruction
   INS_LDY_ZP = 0xA4,
   INS_LDY_ZP_X = 0xB4,
   INS_LDY_ABS = 0xAC,
-  INS_LDY_ABS_X = 0xBC
+  INS_LDY_ABS_X = 0xBC,
+
+  // STA
+  INS_STA_ZP = 0x85,
+  INS_STA_ZP_X = 0x95,
+  INS_STA_ABS = 0x8D,
+  INS_STA_ABS_X = 0x9D,
+  INS_STA_ABS_Y = 0x99,
+  INS_STA_IND_X = 0x81,
+  INS_STA_IND_Y = 0x91
 };
 
 #endif

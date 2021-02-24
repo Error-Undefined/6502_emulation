@@ -16,8 +16,10 @@ LDFLAGS = -g
 PROGS = all_tests
 all: $(PROGS)
 
+TESTS = test_lda.o test_ldx_ldy.o test_sta.o
+
 # Targets rely on implicit rules for compiling and linking
-all_tests: all_tests.o ../lib/cpu.o ../lib/memory.o test_lda.o test_ldx_ldy.o
+all_tests: all_tests.o ../lib/cpu.o ../lib/memory.o $(TESTS)
 
 # Phony targets
 .PHONY: all test clean
