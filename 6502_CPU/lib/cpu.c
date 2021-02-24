@@ -86,7 +86,7 @@ void write_word(struct cpu_struct *cpu, s32* cycles, Word address, Word value)
   Byte lower_value = value & 0xFF;
   Byte higher_value = value >> 8;
   write_byte(cpu, cycles, address, lower_value);
-  write_byte(cpu, cycles, address, higher_value);
+  write_byte(cpu, cycles, address + 1, higher_value);
 }
 
 void load_to_register(struct cpu_struct* cpu, Byte* register_to_load, Byte value)
@@ -278,6 +278,43 @@ void execute(struct cpu_struct *cpu, s32* cycles)
         addr_absolute += cpu->X;       
         Byte load = read_byte(cpu, cycles, addr_absolute);
         load_to_register(cpu, &cpu->Y, load);
+        break;
+      }
+      //--STA--
+      case INS_STA_ZP:
+      {
+        Byte addr_in_zp = fetch_byte(cpu, cycles);
+        write_byte(cpu, cycles, addr_in_zp, cpu->Acc);
+        break;
+      }
+      case INS_STA_ZP_X:
+      {
+        Byte addr_in_zp = fetch_byte(cpu, cycles);
+        addr_in_zp = (addr_in_zp + cpu->X) & 0xFF;
+        *(cycles) = *(cycles) - 1;
+        write_byte(cpu, cycles, addr_in_zp, cpu->Acc);
+        break;
+      }
+      case INS_STA_ABS:
+      {
+        Word addr_absolute = fetch_word(cpu, cycles);
+        write_byte(cpu, cycles, addr_absolute, cpu->Acc);
+        break;
+      }
+      case INS_STA_ABS_X:
+      {
+        Word addr_absolute = fetch_word(cpu, cycles);
+        addr_absolute = addr_absolute + cpu->X;
+        *(cycles) = *(cycles) - 1;
+        write_byte(cpu, cycles, addr_absolute, cpu->Acc);
+        break;
+      }
+      case INS_STA_ABS_Y:
+      {
+        Word addr_absolute = fetch_word(cpu, cycles);
+        addr_absolute = addr_absolute + cpu->Y;
+        *(cycles) = *(cycles) - 1;
+        write_byte(cpu, cycles, addr_absolute, cpu->Acc);
         break;
       }
 
