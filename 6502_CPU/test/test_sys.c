@@ -10,6 +10,20 @@ void before()
 
 static char* test_nop()
 {
+  //Given
+  s32 cycles = 4;
+
+  //Setup
+  memory->memory_array[0xFFFC] = INS_NOP;
+  memory->memory_array[0xFFFD] = INS_NOP;
+
+  //Execute
+  execute(cpu, &cycles);
+
+  //Expect
+  mu_assert("Two NOP should consume 4 cycles", cycles == 0);
+  
+
   return 0;
 }
 
