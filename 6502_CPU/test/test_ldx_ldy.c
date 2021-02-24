@@ -284,7 +284,7 @@ static char* test_ldy_abs_x_page_cross()
   s32 cycles = 5;
   Word absolute_addr = 0x23FF;
   Byte value = 0x17;
-  cpu->X = 0xA1;
+  cpu->X = 0xA2;
 
   Byte lower_address = absolute_addr & 0xFF;
   Byte higher_address = absolute_addr >> 8;

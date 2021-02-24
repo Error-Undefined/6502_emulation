@@ -13,7 +13,7 @@ int main()
   run_all_lda_test(&cpu, &memory);
 
   printf("Running LDX test...\n");
-  run_all_ldx_test(&cpu, &memory);
+  run_all_ldx_ldy_test(&cpu, &memory);
   
 
   printf("End test suite\n");
