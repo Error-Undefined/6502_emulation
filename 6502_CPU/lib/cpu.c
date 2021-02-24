@@ -106,7 +106,7 @@ void execute(struct cpu_struct *cpu, s32* cycles)
     Byte instruction = fetch_byte(cpu, cycles);
     switch (instruction)
     {
-      
+      //--LDA--
       case INS_LDA_IM:
       {
         Byte load = fetch_byte(cpu, cycles);
@@ -191,6 +191,7 @@ void execute(struct cpu_struct *cpu, s32* cycles)
         load_to_register(cpu, &cpu->Acc, load);
         break;
       }
+      //--LDX--
       case INS_LDX_IM:
       {
         Byte load = fetch_byte(cpu, cycles);
@@ -234,6 +235,54 @@ void execute(struct cpu_struct *cpu, s32* cycles)
         addr_absolute += cpu->Y;       
         Byte load = read_byte(cpu, cycles, addr_absolute);
         load_to_register(cpu, &cpu->X, load);
+        printf("Cycles: %d\n", *cycles);
+        break;
+      }
+      //--LDY--
+      case INS_LDY_IM:
+      {
+        Byte load = fetch_byte(cpu, cycles);
+        load_to_register(cpu, &cpu->Y, load);
+        break;
+      }
+      case INS_LDY_ZP:
+      {
+        Byte addr_in_zp = fetch_byte(cpu, cycles);
+        Byte load = read_byte(cpu, cycles, addr_in_zp);
+        load_to_register(cpu, &cpu->Y, load);
+        break;
+      }
+      case INS_LDY_ZP_X:
+      {
+        Byte addr_in_zp = fetch_byte(cpu, cycles);
+        
+        addr_in_zp += cpu->X;
+        addr_in_zp &= 0xFF;
+        *(cycles) = *(cycles) - 1; // Consume an extra cycle
+
+        Byte load = read_byte(cpu, cycles, addr_in_zp);
+        load_to_register(cpu, &cpu->Y, load);
+        break;
+      }
+      case INS_LDY_ABS:
+      {
+        Word addr_absolute = fetch_word(cpu, cycles);
+        Byte load = read_byte(cpu, cycles, addr_absolute);
+        load_to_register(cpu, &cpu->Y, load);
+        break;
+      }
+      case INS_LDY_ABS_X:
+      {
+        Word addr_absolute = fetch_word(cpu, cycles);
+        // Test if we cross a page boundary (Higher byte after addition is different) and consume a cycle
+        if(((addr_absolute >> 8) ^ ((addr_absolute + cpu->X) >> 8)))
+        {
+          *(cycles) = *(cycles) - 1;
+        }
+        addr_absolute += cpu->X;       
+        Byte load = read_byte(cpu, cycles, addr_absolute);
+        load_to_register(cpu, &cpu->Y, load);
+        printf("Cycles: %d\n", *cycles);
         break;
       }
 

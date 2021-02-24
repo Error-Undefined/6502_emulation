@@ -359,7 +359,7 @@ int run_all_ldx_ldy_test(struct cpu_struct* cpu_in, struct memory_struct* memory
     fprintf(stderr,"Not all LDX/LDY tests passed\n");
     return -1;
   }
-  printf("All LDX tests passed\n---------\n");
+  printf("All LDX/LDY tests passed\n---------\n");
 
   return 0;
 }

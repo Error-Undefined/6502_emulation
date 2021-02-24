@@ -12,7 +12,7 @@ int main()
   printf("Running LDA test...\n");
   run_all_lda_test(&cpu, &memory);
 
-  printf("Running LDX test...\n");
+  printf("Running LDX/LDY test...\n");
   run_all_ldx_ldy_test(&cpu, &memory);
   
 
