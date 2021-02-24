@@ -161,6 +161,14 @@ Word address_absolute_y(struct cpu_struct* cpu, s32* cycles, int check_page_boun
   return addr_absolute;
 }
 
+// Consumes 4 clock cycles
+Word address_indirect(struct cpu_struct* cpu, s32* cycles)
+{
+  Word addr_indirect = fetch_word(cpu, cycles);
+  Word value_address = read_word(cpu, cycles, addr_indirect);
+  return value_address;
+}
+
 // Indexed indirect always with X register. 
 // Consumes 4 clock cycles.
 Word address_indexed_indirect(struct cpu_struct* cpu, s32* cycles)
@@ -405,6 +413,20 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       {
         Word addr_absolute = address_absolute(cpu, cycles);
         write_byte(cpu, cycles, addr_absolute, cpu->Y);
+        break;
+      }
+
+      //--JMP--//
+      case INS_JMP_ABS:
+      {
+        Word addr_absolute = address_absolute(cpu, cycles);
+        cpu->PC = addr_absolute;
+        break;
+      }
+      case INS_JMP_IND:
+      {
+        Word addr_indirect = address_indirect(cpu, cycles);
+        cpu->PC = addr_indirect;
         break;
       }
 

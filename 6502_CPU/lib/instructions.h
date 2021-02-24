@@ -50,6 +50,16 @@ enum Instruction
   INS_STY_ZP_X = 0x94,
   INS_STY_ABS = 0x8C,
 
+  //JMP
+  INS_JMP_ABS = 0x4C,
+  INS_JMP_IND = 0x6C,
+
+  //JSR
+  INS_JSR_ABS = 0x20,
+
+  //RTS
+  INS_RTS_IMP = 0x60,
+
   // NOP
   INS_NOP = 0xEA
 };
