@@ -96,6 +96,7 @@ void load_to_register(struct cpu_struct* cpu, Byte* register_to_load, Byte value
   cpu->status_flags.N = (value >> 6);
 }
 
+// Addressing modes
 
 void execute(struct cpu_struct *cpu, s32* cycles)
 { 
@@ -317,9 +318,28 @@ void execute(struct cpu_struct *cpu, s32* cycles)
         write_byte(cpu, cycles, addr_absolute, cpu->Acc);
         break;
       }
+      case INS_STA_IND_X:
+      {
+        Byte addr_indirect_zp = fetch_byte(cpu, cycles);
+        addr_indirect_zp = (addr_indirect_zp + cpu->X) & 0xFF;
+        *(cycles) = *(cycles) - 1;
+        Word value_address = read_word(cpu, cycles, addr_indirect_zp);
+        write_byte(cpu, cycles, value_address, cpu->Acc);
+        break;
+      }
+      case INS_STA_IND_Y:
+      {
+        Byte addr_indirect_zp = fetch_byte(cpu, cycles);
+        Word addr_indirect_word = read_word(cpu, cycles, addr_indirect_zp);
+        addr_indirect_word = addr_indirect_word + cpu->Y;
+        *(cycles) = *(cycles) - 1; 
+        write_byte(cpu, cycles, addr_indirect_word, cpu->Acc);
+        break;
+      }
 
       default:
         printf("Found instruction 0x%x, not implemented! Returning from execution\n", instruction);
+        printf("Clock cycles left: %d\n", *(cycles) + 1);
         return;
         break;
     }
