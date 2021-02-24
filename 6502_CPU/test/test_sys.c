@@ -3,7 +3,7 @@
 #include "include_headers.h"
 #include "test_sys.h"
 
-void before()
+static void before()
 {
   reset_cpu(cpu, memory);
 }

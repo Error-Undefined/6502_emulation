@@ -21,6 +21,10 @@ int main()
   if(run_all_sta_test(&cpu, &memory) != 0)
     goto test_failed;
 
+  printf("Running STX/STY test...\n");
+  if(run_all_stx_sty_test(&cpu, &memory) != 0)
+    goto test_failed;
+
   printf("Running system instruction test...\n");
   if(run_all_sys_test(&cpu, &memory) != 0)
     goto test_failed;
