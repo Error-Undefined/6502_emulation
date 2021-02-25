@@ -16,7 +16,7 @@ LDFLAGS = -g
 PROGS = all_tests
 all: $(PROGS)
 
-TESTS = test_lda.o test_ldx_ldy.o test_sta.o test_sys.o test_stx_sty.o test_jmp_call.o test_transfers.o
+TESTS = test_lda.o test_ldx_ldy.o test_sta.o test_sys.o test_stx_sty.o test_jmp_call.o test_transfers.o test_stack.o
 
 # Targets rely on implicit rules for compiling and linking
 all_tests: all_tests.o ../lib/cpu.o ../lib/memory.o $(TESTS)
@@ -30,10 +30,10 @@ clean:
 	rm ../lib/*.o
 
 # Also clean .d files
-depclean: clean
+depclean:
 	rm -f *.d
 	rm ../lib/*.d
-
+	clean
 
 # Include the *.d files
 SRC = $(wildcard *.c)

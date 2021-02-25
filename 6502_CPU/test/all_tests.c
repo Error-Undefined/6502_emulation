@@ -29,6 +29,10 @@ int main()
   if(run_all_transfers_test(&cpu, &memory) != 0)
     goto test_failed;
 
+  printf("Running stack test...\n");
+  if(run_all_stack_test(&cpu, &memory) != 0)
+    goto test_failed;
+
   printf("Running jump/call test...\n");
   if(run_all_jmp_call_test(&cpu, &memory) != 0)
     goto test_failed;
