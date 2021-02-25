@@ -48,6 +48,15 @@ enum Instruction
   INS_STY_ZP_X = 0x94,
   INS_STY_ABS = 0x8C,
 
+  //TAX
+  INS_TAX_IMP = 0xAA, 
+  //TAY
+  INS_TAY_IMP = 0xA8,
+  //TXA
+  INS_TXA_IMP = 0x8A,
+  //TYA
+  INS_TYA_IMP = 0x9A,
+
   //JMP
   INS_JMP_ABS = 0x4C,
   INS_JMP_IND = 0x6C,

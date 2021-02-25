@@ -24,6 +24,10 @@ int main()
   printf("Running STX/STY test...\n");
   if(run_all_stx_sty_test(&cpu, &memory) != 0)
     goto test_failed;
+  
+  printf("Running transfers test...\n");
+  if(run_all_transfers_test(&cpu, &memory) != 0)
+    goto test_failed;
 
   printf("Running jump/call test...\n");
   if(run_all_jmp_call_test(&cpu, &memory) != 0)

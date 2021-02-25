@@ -99,6 +99,7 @@ void write_word(struct cpu_struct *cpu, s32* cycles, Word address, Word value)
   write_byte(cpu, cycles, address + 1, higher_value);
 }
 
+//Loads a byte to the specified register. Sets the zero flag and negative flag if applicable
 void load_to_register(struct cpu_struct* cpu, Byte* register_to_load, Byte value)
 {
   *register_to_load = value;
@@ -461,6 +462,34 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       {
         Word addr_absolute = address_absolute(cpu, cycles);
         write_byte(cpu, cycles, addr_absolute, cpu->Y);
+        break;
+      }
+      //--TAX--//
+      case INS_TAX_IMP:
+      {
+        load_to_register(cpu, &cpu->X, cpu->Acc);
+        consume_cycle(cycles);
+        break;
+      }
+      //--TAY--//
+      case INS_TAY_IMP:
+      {
+        load_to_register(cpu, &cpu->Y, cpu->Acc);
+        consume_cycle(cycles);
+        break;
+      }
+      //--TXA--//
+      case INS_TXA_IMP:
+      {
+        load_to_register(cpu, &cpu->Acc, cpu->X);
+        consume_cycle(cycles);
+        break;
+      }
+      //--TYA--//
+      case INS_TYA_IMP:
+      {
+        load_to_register(cpu, &cpu->Acc, cpu->Y);
+        consume_cycle(cycles);
         break;
       }
       //--JMP--//
