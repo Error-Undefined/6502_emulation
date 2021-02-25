@@ -22,7 +22,7 @@ struct cpu_struct
     Byte U : 1; // Bit 5, Unused  
     Byte V : 1; // Bit 6, Overflow flag
     Byte N : 1; // Bit 7, Negative flag
-  } status_flags;
+  } status_flags; // Bit field makes this struct only 8 bits and conforms to the original 6502
 
   // Pointer to the memory for the CPU - like a memory bus
   struct memory_struct* memory_bus;

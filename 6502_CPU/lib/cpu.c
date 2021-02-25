@@ -29,6 +29,7 @@ void reset_cpu_word(struct cpu_struct* cpu, struct memory_struct* memory, Word r
   cpu->status_flags.I = 0;
   cpu->status_flags.D = 0;
   cpu->status_flags.B = 0;
+  cpu->status_flags.U = 1;
   cpu->status_flags.V = 0;
   cpu->status_flags.N = 0;
 
@@ -533,7 +534,8 @@ void execute(struct cpu_struct *cpu, s32* cycles)
 
       default:
         printf("Found instruction 0x%x, not implemented! Returning from execution\n", instruction);
-        printf("Clock cycles left: %d\n", *(cycles) + 1);
+        *(cycles) = *(cycles) + 1;
+        printf("Clock cycles left: %d\n", *(cycles));
         return;
         break;
     }

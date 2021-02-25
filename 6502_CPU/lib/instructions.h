@@ -55,7 +55,20 @@ enum Instruction
   //TXA
   INS_TXA_IMP = 0x8A,
   //TYA
-  INS_TYA_IMP = 0x9A,
+  INS_TYA_IMP = 0x98,
+
+  //TSX
+  INS_TSX_IMP = 0xBA,
+  //TXS
+  INS_TXS_IMP = 0x9A,
+  //PHA
+  INS_PHA_IMP = 0x48,
+  //PHP
+  INS_PHP_IMP = 0x08,
+  //PLA
+  INS_PLA_IMP = 0x68,
+  //PLP
+  INS_PLP_IMP = 0x28,
 
   //JMP
   INS_JMP_ABS = 0x4C,
