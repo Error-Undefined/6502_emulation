@@ -167,7 +167,7 @@ static char* test_jsr_and_then_rts()
   start_test_info();
 
   //Given
-  s32 cycles = 19;
+  s32 cycles = 16;
   Byte lower_address = 0x13;
   Byte higher_address = 0xC1;
   //Word address_subroutine = 0xC113;
@@ -184,12 +184,17 @@ static char* test_jsr_and_then_rts()
   memory->memory_array[0x8003] = INS_LDX_IM;
   memory->memory_array[0x8004] = 0x45;
 
-  memory->memory_array[0xC113] = INS_LDA_ABS;
+  memory->memory_array[0xC113] = INS_LDA_IM;
   memory->memory_array[0xC114] = 0x10;
   memory->memory_array[0xC115] = INS_RTS_IMP;
 
   //Execute
   execute(cpu, &cycles);
+
+  // Assert
+  mu_assert("Accumulator loaded in subroutine", cpu->Acc == 0x10);
+  mu_assert("X register loaded after RTS", cpu->X == 0x45);
+  mu_assert("Sequence consumed 6 + 6 + 2 + 2 = 16 cycles", cycles == 0);
 
   return 0;
 }

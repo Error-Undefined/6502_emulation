@@ -38,9 +38,14 @@ void reset_cpu_word(struct cpu_struct* cpu, struct memory_struct* memory, Word r
 }
 
 // Consumes a cycle from the clock
-void consume_cycle(s32* cycles)
+static void consume_cycle(s32* cycles)
 {
   *(cycles) = *(cycles) - 1;
+}
+
+static void consume_cycles(s32* cycles, int nbr)
+{
+  *(cycles) = *(cycles) - nbr;
 }
 
 // Fetch operations
@@ -204,6 +209,7 @@ static void push_byte_to_stack(struct cpu_struct* cpu, s32* cycles, Byte value)
   Word stack_addr = 0x100 | cpu->SP;
   write_byte(cpu, cycles, stack_addr, value);
   cpu->SP = cpu->SP - 1;
+
 }
 
 // Pushes a word on the stack. The higher byte is pushed first, followed by the lower byte. 
@@ -221,9 +227,9 @@ static void push_word_to_stack(struct cpu_struct* cpu, s32* cycles, Word value)
 // Consumes 1 clock cycle
 static Byte pop_byte_from_stack(struct cpu_struct* cpu, s32* cycles)
 {
+  cpu->SP = cpu->SP + 1;
   Word stack_addr = 0x100 | cpu->SP;
   Byte popped_byte = read_byte(cpu, cycles, stack_addr);
-  cpu->SP = cpu->SP + 1;
   return popped_byte;
 }
 
@@ -484,9 +490,7 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       {
         cpu->PC = pop_word_from_stack(cpu, cycles);
         cpu->PC = cpu->PC + 1;
-        consume_cycle(cycles);
-        consume_cycle(cycles);
-        consume_cycle(cycles);
+        consume_cycles(cycles, 3);
         break;
       }
 
