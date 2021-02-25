@@ -46,8 +46,6 @@ static char* test_jmp_ind()
   Byte higher_jump = 0xA2;
   Word jump_address = 0xA23C;
 
-  Byte test_value = 0xFF;
-
   // Setup
   memory->memory_array[0xFFFC] = INS_JMP_IND;
   memory->memory_array[0xFFFD] = lower_indirect;
@@ -107,9 +105,14 @@ static char* test_jsr_abs()
 
   //Given
   s32 cycles = 6;
+  /*
   Byte lower_address = 0x13;
   Byte higher_address = 0xC1;
   Word address_subroutine = 0xC113;
+  */
+  
+  Byte lower_byte_in_stack = 0xFF;
+  Byte higher_byte_in_stack = 0xFF;
 
   //Setup
   memory->memory_array[0xFFFC] = INS_JSR_ABS;
@@ -122,8 +125,8 @@ static char* test_jsr_abs()
   //Expect
   mu_assert("JSR_ABS should take 6 cycles", cycles == 0);
   mu_assert("Stack pointer should have decremented by two when pushing", cpu->SP == 0xFD);
-  mu_assert("Stack should contain the old prpgram counter", 0);
-  mu_assert("Program counter should be set to the new address", cpu->PC = 0xC113);
+  mu_assert("Stack should contain the old program counter minus one", memory->memory_array[0x1FF] == higher_byte_in_stack && memory->memory_array[0x1FE] == lower_byte_in_stack - 1);
+  mu_assert("Program counter should be set to the new address", cpu->PC == 0xC113);
 
   return 0;
 }
@@ -131,6 +134,62 @@ static char* test_jsr_abs()
 static char* test_rts_imp()
 {
   start_test_info();
+  
+  //Given
+  s32 cycles = 6;
+
+  Byte lower_address_in_stack = 0x14;
+  Byte higher_address_in_stack = 0x54;
+  //Word address_in_stack = 0x5414;
+
+  //Setup
+  memory->memory_array[0xFFFC] = INS_RTS_IMP;
+  memory->memory_array[0x1FF] = higher_address_in_stack;
+  memory->memory_array[0x1FE] = lower_address_in_stack;
+  cpu->SP = 0xFD;
+
+  //Execute
+  execute(cpu, &cycles);
+
+  //Expect
+  mu_assert("RTS_IMP should take 6 cycles", cycles == 0);
+  mu_assert("Stack pointer should have incremented by two", cpu->SP == 0xFF);
+  mu_assert("Program counter should be set to the new address", cpu->PC = 0xC113);
+
+  return 0;
+}
+
+static char* test_jsr_and_then_rts()
+{
+  //Reset
+  reset_cpu_word(cpu, memory, 0x8000);
+
+  start_test_info();
+
+  //Given
+  s32 cycles = 19;
+  Byte lower_address = 0x13;
+  Byte higher_address = 0xC1;
+  //Word address_subroutine = 0xC113;
+  
+  /*
+  Byte lower_byte_in_stack = 0xFF;
+  Byte higher_byte_in_stack = 0xFF;
+  */
+
+  //Setup
+  memory->memory_array[0x8000] = INS_JSR_ABS;
+  memory->memory_array[0x8001] = lower_address;
+  memory->memory_array[0x8002] = higher_address;
+  memory->memory_array[0x8003] = INS_LDX_IM;
+  memory->memory_array[0x8004] = 0x45;
+
+  memory->memory_array[0xC113] = INS_LDA_ABS;
+  memory->memory_array[0xC114] = 0x10;
+  memory->memory_array[0xC115] = INS_RTS_IMP;
+
+  //Execute
+  execute(cpu, &cycles);
 
   return 0;
 }
@@ -151,6 +210,9 @@ static char* all_jmp_call_test()
 
   before();
   mu_run_test(test_rts_imp);
+
+  before();
+  mu_run_test(test_jsr_and_then_rts);
 
   return 0;
 }

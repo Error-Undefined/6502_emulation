@@ -93,10 +93,10 @@ static char* test_lda_negativeflag()
   start_test_info();
   //Setup and run
   s32 cycles = 2;
-  test_lda_im_setup(0b1000000, &cycles);
+  test_lda_im_setup(0x40, &cycles);
 
   // Assert
-  mu_assert("Accumulator loaded wrong value", cpu->Acc == 0b1000000);
+  mu_assert("Accumulator loaded wrong value", cpu->Acc == 0x40);
   mu_assert("LDA_IM did not consume exactly 2 cycles", cycles == 0);
   mu_assert("LDA_IM did not set the negative flag", cpu->status_flags.N == 1);
   return 0;

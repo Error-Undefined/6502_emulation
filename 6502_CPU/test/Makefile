@@ -6,9 +6,9 @@ CC  = $(CXX)
 DEPFLAGS = -MT $@ -MMD -MP -MF $*.d
 
 # Define preprocessor, compiler, and linker flags.
-CXXFLAGS =  -O2 -Wall -Wextra -pedantic-errors -Wold-style-cast 
-CXXFLAGS += -g
-CXXFLAGS += $(DEPFLAGS)
+CFLAGS =  -Og -Wall -Wextra -pedantic-errors -Wold-style-cast 
+CFLAGS += -g
+CFLAGS += $(DEPFLAGS)
 LDFLAGS = -g 
 
 
@@ -24,16 +24,15 @@ all_tests: all_tests.o ../lib/cpu.o ../lib/memory.o $(TESTS)
 # Phony targets
 .PHONY: all test clean
 
-clean_objects:
-	rm -f *.o
-
 # Standard clean
 clean:
 	rm -f *.o $(PROGS)
+	rm ../lib/*.o
 
 # Also clean .d files
 depclean: clean
 	rm -f *.d
+	rm ../lib/*.d
 
 
 # Include the *.d files

@@ -3,8 +3,6 @@
 #ifndef INS_H
 #define INS_H
 
-typedef enum Instruction Instruction_Type;
-
 enum Instruction
 {
   // LDA
@@ -63,5 +61,7 @@ enum Instruction
   // NOP
   INS_NOP = 0xEA
 };
+
+typedef enum Instruction Instruction_Type;
 
 #endif
