@@ -84,7 +84,7 @@ static char* test_pla()
   Byte value = 0x80;
 
   //Setup
-  memory->memory_array[0xFFFC] = INS_PHA_IMP;
+  memory->memory_array[0xFFFC] = INS_PLA_IMP;
   memory->memory_array[0x1FF] = value; // Top of stack
   cpu->Acc = 0;
   cpu->SP = 0xFE; //Already decremented by 1 for test
@@ -186,10 +186,10 @@ static char* all_stack_test()
   mu_run_test(test_pha);
 
   before();
-  mu_run_test(test_php);
+  mu_run_test(test_pla);
 
   before();
-  mu_run_test(test_pla);
+  mu_run_test(test_php);
 
   before();
   mu_run_test(test_plp);

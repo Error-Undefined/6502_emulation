@@ -49,6 +49,38 @@ static void consume_cycles(s32* cycles, int nbr)
   *(cycles) = *(cycles) - nbr;
 }
 
+// Transfers the contents of a byte to the processor status flags.
+// Consumes a clock cycle
+static void transfer_byte_to_cpu_status(struct cpu_struct* cpu, s32* cycles, Byte value)
+{
+  cpu->status_flags.C = value >> 0 & 1;
+  cpu->status_flags.Z = value >> 1 & 1;
+  cpu->status_flags.I = value >> 2 & 1;
+  cpu->status_flags.D = value >> 3 & 1;
+  cpu->status_flags.B = value >> 4 & 1;
+
+  cpu->status_flags.V = value >> 6 & 1;
+  cpu->status_flags.N = value >> 7 & 1;
+  
+  consume_cycle(cycles);
+}
+
+// Transfers the contents of the processor status flags to a byte.
+// Consumes a clock cycle
+static Byte transfer_cpu_status_to_byte(struct cpu_struct* cpu, s32* cycles)
+{
+  Byte status = cpu->status_flags.N;
+  status = (status << 1) | cpu->status_flags.V;
+  status = (status << 1) | 1; //Unused byte
+  status = (status << 1) | cpu->status_flags.B;
+  status = (status << 1) | cpu->status_flags.D;
+  status = (status << 1) | cpu->status_flags.I;
+  status = (status << 1) | cpu->status_flags.Z;
+  status = (status << 1) | cpu->status_flags.C;
+  consume_cycle(cycles);
+  return status;
+}
+
 // Fetch operations
 Byte fetch_byte(struct cpu_struct *cpu, s32* cycles)
 {
@@ -493,6 +525,51 @@ void execute(struct cpu_struct *cpu, s32* cycles)
         consume_cycle(cycles);
         break;
       }
+      //--TSX--//
+      case INS_TSX_IMP:
+      {
+        load_to_register(cpu, &cpu->X, cpu->SP);
+        consume_cycle(cycles);
+        break;
+      }
+      //--TXS--//
+      case INS_TXS_IMP:
+      {
+        cpu->SP = cpu->X;
+        consume_cycle(cycles);
+        break;
+      }
+      //--PHA--//
+      case INS_PHA_IMP:
+      {
+        push_byte_to_stack(cpu, cycles, cpu->Acc);
+        consume_cycle(cycles);
+        break;
+      }
+      //--PLA--//
+      case INS_PLA_IMP:
+      {
+        Byte stack_byte = pop_byte_from_stack(cpu, cycles);
+        consume_cycles(cycles, 2);
+        load_to_register(cpu, &cpu->Acc, stack_byte);
+        break;
+      }
+      //--PHP--//
+      case INS_PHP_IMP:
+      {
+        Byte processor_status = transfer_cpu_status_to_byte(cpu, cycles);
+        push_byte_to_stack(cpu, cycles, processor_status);
+        break;
+      }
+      //--PLP--//
+      case INS_PLP_IMP:
+      {
+        Byte processor_status = pop_byte_from_stack(cpu, cycles);
+        transfer_byte_to_cpu_status(cpu, cycles, processor_status);
+        consume_cycle(cycles);
+        break;
+      }
+
       //--JMP--//
       case INS_JMP_ABS:
       {
