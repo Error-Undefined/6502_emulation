@@ -803,10 +803,10 @@ static char* test_bit_abs()
   Byte lower_address = 0x41;
   Byte higher_Address = 0xAA;
   Word total_address = 0xAA41;
-  Byte acc_value = 0x19; // Chosen as 0xA4 & 0x53 != 0
+  Byte acc_value = 0x19; // Chosen as 0x72 & 0x19 != 0
 
   // Setup
-  memory->memory_array[0xFFFC] = INS_BIT_ZP;
+  memory->memory_array[0xFFFC] = INS_BIT_ABS;
   memory->memory_array[0xFFFD] = lower_address;
   memory->memory_array[0xFFFE] = higher_Address;
   memory->memory_array[total_address] = value_mem;

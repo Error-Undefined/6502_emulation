@@ -146,7 +146,7 @@ void write_word(struct cpu_struct *cpu, s32* cycles, Word address, Word value)
 void load_to_register(struct cpu_struct* cpu, Byte* register_to_load, Byte value)
 {
   *register_to_load = value;
-  cpu->status_flags.Z = ~value;
+  cpu->status_flags.Z = value  == 0 ? 1 : 0;
   cpu->status_flags.N = (value >> 7);
 }
 
@@ -795,7 +795,24 @@ void execute(struct cpu_struct *cpu, s32* cycles)
         or_register(cpu, cycles, &cpu->Acc, addr_ind);
         break;
       }
-      
+      case INS_BIT_ZP:
+      {
+        Byte addr_zp = address_zero_page(cpu, cycles);
+        Byte value = read_byte(cpu, cycles, addr_zp);
+        cpu->status_flags.V = (value >> 6) & 1;
+        cpu->status_flags.N = (value >> 7) & 1;
+        cpu->status_flags.Z = (value & cpu->Acc) == 0 ? 1 : 0;
+        break;
+      }
+      case INS_BIT_ABS:
+      {
+        Word addr_abs = address_absolute(cpu, cycles);
+        Byte value = read_byte(cpu, cycles, addr_abs);
+        cpu->status_flags.V = (value >> 6) & 1;
+        cpu->status_flags.N = (value >> 7) & 1;
+        cpu->status_flags.Z = (value & cpu->Acc) == 0 ? 1 : 0;
+        break;
+      }
 
       //--System instructions--//
       case INS_NOP:
