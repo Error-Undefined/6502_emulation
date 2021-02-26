@@ -44,10 +44,12 @@ static void consume_cycle(s32* cycles)
   *(cycles) = *(cycles) - 1;
 }
 
+/*
 static void consume_cycles(s32* cycles, int nbr)
 {
   *(cycles) = *(cycles) - nbr;
 }
+*/
 
 // Transfers the contents of a byte to the processor status flags.
 // Consumes a clock cycle
@@ -157,6 +159,30 @@ void and_register(struct cpu_struct* cpu, s32* cycles, Byte* register_to_and, Wo
 {
   Byte value_to_and = read_byte(cpu, cycles, memory_address);
   Byte result = *(register_to_and) & value_to_and;
+  load_to_register(cpu, register_to_and, result);
+}
+
+// Performs a bitwise logical EOR on a register with the value at a specified memory address.
+// Sets processor status flags if applicable:
+// Zero flag is set if result is 0
+// N is set if bit 7 of result is 1
+// Consumes 1 clock cycle.
+void eor_register(struct cpu_struct* cpu, s32* cycles, Byte* register_to_and, Word memory_address)
+{
+  Byte value_to_and = read_byte(cpu, cycles, memory_address);
+  Byte result = *(register_to_and) ^ value_to_and;
+  load_to_register(cpu, register_to_and, result);
+}
+
+// Performs a bitwise logical OR on a register with the value at a specified memory address.
+// Sets processor status flags if applicable:
+// Zero flag is set if result is 0
+// N is set if bit 7 of result is 1
+// Consumes 1 clock cycle.
+void or_register(struct cpu_struct* cpu, s32* cycles, Byte* register_to_and, Word memory_address)
+{
+  Byte value_to_and = read_byte(cpu, cycles, memory_address);
+  Byte result = *(register_to_and) | value_to_and;
   load_to_register(cpu, register_to_and, result);
 }
 
@@ -671,7 +697,50 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       //--EOR--//
       case INS_EOR_IM:
       {
-
+        eor_register(cpu, cycles, &cpu->Acc, cpu->PC);
+        break;
+      }
+      case INS_EOR_ZP:
+      {
+        Word addr_zp = address_zero_page(cpu, cycles);
+        eor_register(cpu, cycles, &cpu->Acc, addr_zp);
+        break;
+      }
+      case INS_EOR_ZP_X:
+      {
+        Word addr_zp = address_zero_page_x(cpu, cycles);
+        eor_register(cpu, cycles, &cpu->Acc, addr_zp);
+        break;
+      }
+      case INS_EOR_ABS:
+      {
+        Word addr_abs = address_absolute(cpu, cycles);
+        eor_register(cpu, cycles, &cpu->Acc, addr_abs);
+        break;
+      }
+      case INS_EOR_ABS_X:
+      {
+        Word addr_abs = address_absolute_x(cpu, cycles, 1);
+        eor_register(cpu, cycles, &cpu->Acc, addr_abs);
+        break;
+      }
+      case INS_EOR_ABS_Y:
+      {
+        Word addr_abs = address_absolute_y(cpu, cycles, 1);
+        eor_register(cpu, cycles, &cpu->Acc, addr_abs);
+        break;
+      }
+      case INS_EOR_IND_X:
+      {
+        Word addr_ind = address_indexed_indirect(cpu, cycles);
+        eor_register(cpu, cycles, &cpu->Acc, addr_ind);
+        break;
+      }
+      case INS_EOR_IND_Y:
+      {
+        Word addr_ind = address_indirect_indexed(cpu, cycles, 1);
+        eor_register(cpu, cycles, &cpu->Acc, addr_ind);
+        break;
       }
 
       //--System instructions--//
