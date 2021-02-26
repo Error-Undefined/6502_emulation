@@ -148,6 +148,18 @@ void load_to_register(struct cpu_struct* cpu, Byte* register_to_load, Byte value
   cpu->status_flags.N = (value >> 7);
 }
 
+// Performs a bitwise logical AND on a register with the value at a specified memory address.
+// Sets processor status flags if applicable:
+// Zero flag is set if result is 0
+// N is set if bit 7 of result is 1
+// Consumes 1 clock cycle.
+void and_register(struct cpu_struct* cpu, s32* cycles, Byte* register_to_and, Word memory_address)
+{
+  Byte value_to_and = read_byte(cpu, cycles, memory_address);
+  Byte result = *(register_to_and) & value_to_and;
+  load_to_register(cpu, register_to_and, result);
+}
+
 /* Addressing modes */
 
 //Consumes 1 clock cycle
@@ -611,66 +623,55 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       //--AND--//
       case INS_AND_IM:
       {
-        Byte value = fetch_byte(cpu, cycles);
-        Byte load_value = value & cpu->Acc;
-        load_to_register(cpu, &cpu->Acc, load_value);
+        and_register(cpu, cycles, &cpu->Acc, cpu->PC);
         break;
       }
       case INS_AND_ZP:
       {
         Byte addr_zp = address_zero_page(cpu, cycles);
-        Byte value = read_byte(cpu, cycles, addr_zp);
-        Byte load_value = value & cpu->Acc;
-        load_to_register(cpu, &cpu->Acc, load_value);
+        and_register(cpu, cycles, &cpu->Acc, addr_zp);
         break;
       }
       case INS_AND_ZP_X:
       {
         Byte addr_zp = address_zero_page_x(cpu, cycles);
-        Byte value = read_byte(cpu, cycles, addr_zp);
-        Byte load_value = value & cpu->Acc;
-        load_to_register(cpu, &cpu->Acc, load_value);
+        and_register(cpu, cycles, &cpu->Acc, addr_zp);
         break;
       }
       case INS_AND_ABS:
       {
         Word addr_abs = address_absolute(cpu, cycles);
-        Byte value = read_byte(cpu, cycles, addr_abs);
-        Byte load_value = value & cpu->Acc;
-        load_to_register(cpu, &cpu->Acc, load_value);
+        and_register(cpu, cycles, &cpu->Acc, addr_abs);
         break;
       }
       case INS_AND_ABS_X:
       {
         Word addr_abs = address_absolute_x(cpu, cycles, 1);
-        Byte value = read_byte(cpu, cycles, addr_abs);
-        Byte load_value = value & cpu->Acc;
-        load_to_register(cpu, &cpu->Acc, load_value);
+        and_register(cpu, cycles, &cpu->Acc, addr_abs);
         break;
       }
       case INS_AND_ABS_Y:
       {
         Word addr_abs = address_absolute_y(cpu, cycles, 1);
-        Byte value = read_byte(cpu, cycles, addr_abs);
-        Byte load_value = value & cpu->Acc;
-        load_to_register(cpu, &cpu->Acc, load_value);
+        and_register(cpu, cycles, &cpu->Acc, addr_abs);
         break;
       }
       case INS_AND_IND_X:
       {
         Word addr_ind = address_indexed_indirect(cpu, cycles);
-        Byte value = read_byte(cpu, cycles, addr_ind);
-        Byte load_value = value & cpu->Acc;
-        load_to_register(cpu, &cpu->Acc, load_value);
+        and_register(cpu, cycles, &cpu->Acc, addr_ind);
         break;
       }
       case INS_AND_IND_Y:
       {
         Word addr_ind = address_indirect_indexed(cpu, cycles, 1);
-        Byte value = read_byte(cpu, cycles, addr_ind);
-        Byte load_value = value & cpu->Acc;
-        load_to_register(cpu, &cpu->Acc, load_value);
+        and_register(cpu, cycles, &cpu->Acc, addr_ind);
         break;
+      }
+      //--EOR--//
+      case INS_EOR_IM:
+      {
+
       }
 
       //--System instructions--//
