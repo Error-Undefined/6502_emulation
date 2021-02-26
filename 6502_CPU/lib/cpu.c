@@ -258,17 +258,18 @@ static void push_word_to_stack(struct cpu_struct* cpu, s32* cycles, Word value)
 }
 
 // Pops a byte from the stack. The stack pointer is incremented.
-// Consumes 1 clock cycle
+// Consumes 2 clock cycles
 static Byte pop_byte_from_stack(struct cpu_struct* cpu, s32* cycles)
 {
   cpu->SP = cpu->SP + 1;
   Word stack_addr = 0x100 | cpu->SP;
+  consume_cycle(cycles);
   Byte popped_byte = read_byte(cpu, cycles, stack_addr);
   return popped_byte;
 }
 
 // Pops a word from the stack. The stack pointer is incremented.
-// Consumes 2 clock cycles
+// Consumes 4 clock cycles
 static Word pop_word_from_stack(struct cpu_struct* cpu, s32* cycles)
 {
   Byte lower_byte = pop_byte_from_stack(cpu, cycles);
@@ -550,8 +551,8 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       case INS_PLA_IMP:
       {
         Byte stack_byte = pop_byte_from_stack(cpu, cycles);
-        consume_cycles(cycles, 2);
         load_to_register(cpu, &cpu->Acc, stack_byte);
+        consume_cycle(cycles);
         break;
       }
       //--PHP--//
@@ -566,7 +567,6 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       {
         Byte processor_status = pop_byte_from_stack(cpu, cycles);
         transfer_byte_to_cpu_status(cpu, cycles, processor_status);
-        consume_cycle(cycles);
         break;
       }
 
@@ -597,7 +597,7 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       {
         cpu->PC = pop_word_from_stack(cpu, cycles);
         cpu->PC = cpu->PC + 1;
-        consume_cycles(cycles, 3);
+        consume_cycle(cycles);
         break;
       }
 
