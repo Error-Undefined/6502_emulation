@@ -534,6 +534,7 @@ static char* test_ora_im()
   //Assert
   mu_assert("INS_ORA_IM should take 2 clock cycles", cycles == 0);
   mu_assert("Contents of accumulator should have been ORA with value", cpu->Acc == expected_result);
+  mu_assert("Program counter should increment", cpu->PC == 0xFFFE);
 
   return 0;
 }

@@ -649,7 +649,8 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       //--AND--//
       case INS_AND_IM:
       {
-        and_register(cpu, cycles, &cpu->Acc, cpu->PC);
+        Byte and_value = fetch_byte(cpu, cycles);
+        cpu->Acc = cpu->Acc & and_value;
         break;
       }
       case INS_AND_ZP:
@@ -697,7 +698,8 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       //--EOR--//
       case INS_EOR_IM:
       {
-        eor_register(cpu, cycles, &cpu->Acc, cpu->PC);
+        Byte eor_value = fetch_byte(cpu, cycles);
+        cpu->Acc = cpu->Acc ^ eor_value;
         break;
       }
       case INS_EOR_ZP:
@@ -740,6 +742,54 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       {
         Word addr_ind = address_indirect_indexed(cpu, cycles, 1);
         eor_register(cpu, cycles, &cpu->Acc, addr_ind);
+        break;
+      }
+      case INS_ORA_IM:
+      {
+        Byte or_value = fetch_byte(cpu, cycles);
+        cpu->Acc = cpu->Acc | or_value;
+        break;
+      }
+      case INS_ORA_ZP:
+      {
+        Word addr_zp = address_zero_page(cpu, cycles);
+        or_register(cpu, cycles, &cpu->Acc, addr_zp);
+        break;
+      }
+      case INS_ORA_ZP_X:
+      {
+        Word addr_zp = address_zero_page_x(cpu, cycles);
+        or_register(cpu, cycles, &cpu->Acc, addr_zp);
+        break;
+      }
+      case INS_ORA_ABS:
+      {
+        Word addr_absolute = address_absolute(cpu, cycles);
+        or_register(cpu, cycles, &cpu->Acc, addr_absolute);
+        break;
+      }
+      case INS_ORA_ABS_X:
+      {
+        Word addr_absolute = address_absolute_x(cpu, cycles, 1);
+        or_register(cpu, cycles, &cpu->Acc, addr_absolute);
+        break;
+      }
+      case INS_ORA_ABS_Y:
+      {
+        Word addr_absolute = address_absolute_y(cpu, cycles, 1);
+        or_register(cpu, cycles, &cpu->Acc, addr_absolute);
+        break;
+      }
+      case INS_ORA_IND_X:
+      {
+        Word addr_ind = address_indexed_indirect(cpu, cycles);
+        or_register(cpu, cycles, &cpu->Acc, addr_ind);
+        break;
+      }
+      case INS_ORA_IND_Y:
+      {
+        Word addr_ind = address_indirect_indexed(cpu, cycles, 1);
+        or_register(cpu, cycles, &cpu->Acc, addr_ind);
         break;
       }
 
