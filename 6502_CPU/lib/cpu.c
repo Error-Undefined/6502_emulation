@@ -81,7 +81,8 @@ static Byte transfer_cpu_status_to_byte(struct cpu_struct* cpu, s32* cycles)
   return status;
 }
 
-// Fetch operations
+/* Fetch operations */
+// Fetch a byte from the program counter and increment it. Consumes 1 cycle.
 Byte fetch_byte(struct cpu_struct *cpu, s32* cycles)
 {
   Byte to_fetch = cpu->memory_bus->memory_array[cpu->PC];
@@ -90,6 +91,7 @@ Byte fetch_byte(struct cpu_struct *cpu, s32* cycles)
   return to_fetch;
 }
 
+// Fetch a word from the program counter and increment it (by 2). Consumes 2 cycle.
 Word fetch_word(struct cpu_struct *cpu, s32* cycles)
 {
   Byte lower_byte = fetch_byte(cpu, cycles);
@@ -100,7 +102,8 @@ Word fetch_word(struct cpu_struct *cpu, s32* cycles)
   return to_fetch;
 }
 
-// Read operations
+/*  Read operations */
+// Reads a byte from the given memory address. Consumes 1 clock cycle.
 Byte read_byte(struct cpu_struct *cpu, s32* cycles, Word address)
 {
   Byte to_read = cpu->memory_bus->memory_array[address];
@@ -108,6 +111,7 @@ Byte read_byte(struct cpu_struct *cpu, s32* cycles, Word address)
   return to_read;
 }
 
+// Reads a word from the given memory address. Consumes 2 clock cycles.
 Word read_word(struct cpu_struct *cpu, s32* cycles, Word address)
 {
   Byte lower_byte = read_byte(cpu, cycles, address);
@@ -118,12 +122,14 @@ Word read_word(struct cpu_struct *cpu, s32* cycles, Word address)
 }
 
 // Write operations
+// Writes a byte to the given memory address. Consumes 1 clock cycle.
 void write_byte(struct cpu_struct *cpu, s32* cycles, Word address, Byte value)
 {
   cpu->memory_bus->memory_array[address] = value;
   consume_cycle(cycles);
 }
 
+// Writes a word to the given memory address. Consumes 2 clock cycle.
 void write_word(struct cpu_struct *cpu, s32* cycles, Word address, Word value)
 {
   Byte lower_value = value & 0xFF;
@@ -132,12 +138,14 @@ void write_word(struct cpu_struct *cpu, s32* cycles, Word address, Word value)
   write_byte(cpu, cycles, address + 1, higher_value);
 }
 
-//Loads a byte to the specified register. Sets the zero flag and negative flag if applicable
+//Loads a byte to the specified register. Sets the zero flag and negative flag if applicable;
+// Zero flag is set if value is 0
+// N is set if bit 7 of the value is 1
 void load_to_register(struct cpu_struct* cpu, Byte* register_to_load, Byte value)
 {
   *register_to_load = value;
   cpu->status_flags.Z = ~value;
-  cpu->status_flags.N = (value >> 6);
+  cpu->status_flags.N = (value >> 7);
 }
 
 /* Addressing modes */
@@ -598,6 +606,13 @@ void execute(struct cpu_struct *cpu, s32* cycles)
         cpu->PC = pop_word_from_stack(cpu, cycles);
         cpu->PC = cpu->PC + 1;
         consume_cycle(cycles);
+        break;
+      }
+      //--AND--//
+      case INS_AND_IM:
+      {
+        Byte value = fetch_byte(cpu, cycles);
+        cpu->Acc = cpu->Acc & value;
         break;
       }
 
