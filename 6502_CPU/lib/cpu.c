@@ -612,10 +612,66 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       case INS_AND_IM:
       {
         Byte value = fetch_byte(cpu, cycles);
-        cpu->Acc = cpu->Acc & value;
+        Byte load_value = value & cpu->Acc;
+        load_to_register(cpu, &cpu->Acc, load_value);
         break;
       }
-
+      case INS_AND_ZP:
+      {
+        Byte addr_zp = address_zero_page(cpu, cycles);
+        Byte value = read_byte(cpu, cycles, addr_zp);
+        Byte load_value = value & cpu->Acc;
+        load_to_register(cpu, &cpu->Acc, load_value);
+        break;
+      }
+      case INS_AND_ZP_X:
+      {
+        Byte addr_zp = address_zero_page_x(cpu, cycles);
+        Byte value = read_byte(cpu, cycles, addr_zp);
+        Byte load_value = value & cpu->Acc;
+        load_to_register(cpu, &cpu->Acc, load_value);
+        break;
+      }
+      case INS_AND_ABS:
+      {
+        Word addr_abs = address_absolute(cpu, cycles);
+        Byte value = read_byte(cpu, cycles, addr_abs);
+        Byte load_value = value & cpu->Acc;
+        load_to_register(cpu, &cpu->Acc, load_value);
+        break;
+      }
+      case INS_AND_ABS_X:
+      {
+        Word addr_abs = address_absolute_x(cpu, cycles, 1);
+        Byte value = read_byte(cpu, cycles, addr_abs);
+        Byte load_value = value & cpu->Acc;
+        load_to_register(cpu, &cpu->Acc, load_value);
+        break;
+      }
+      case INS_AND_ABS_Y:
+      {
+        Word addr_abs = address_absolute_y(cpu, cycles, 1);
+        Byte value = read_byte(cpu, cycles, addr_abs);
+        Byte load_value = value & cpu->Acc;
+        load_to_register(cpu, &cpu->Acc, load_value);
+        break;
+      }
+      case INS_AND_IND_X:
+      {
+        Word addr_ind = address_indexed_indirect(cpu, cycles);
+        Byte value = read_byte(cpu, cycles, addr_ind);
+        Byte load_value = value & cpu->Acc;
+        load_to_register(cpu, &cpu->Acc, load_value);
+        break;
+      }
+      case INS_AND_IND_Y:
+      {
+        Word addr_ind = address_indirect_indexed(cpu, cycles, 1);
+        Byte value = read_byte(cpu, cycles, addr_ind);
+        Byte load_value = value & cpu->Acc;
+        load_to_register(cpu, &cpu->Acc, load_value);
+        break;
+      }
 
       //--System instructions--//
       case INS_NOP:
