@@ -37,6 +37,10 @@ int main()
   if(run_all_jmp_call_test(&cpu, &memory) != 0)
     goto test_failed;
 
+  printf("Running logic test...\n");
+  if(run_all_logic_test(&cpu, &memory) != 0)
+    goto test_failed;
+
   printf("Running system instruction test...\n");
   if(run_all_sys_test(&cpu, &memory) != 0)
     goto test_failed;

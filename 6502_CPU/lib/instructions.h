@@ -70,6 +70,40 @@ enum Instruction
   //PLP
   INS_PLP_IMP = 0x28,
 
+  //AND
+  INS_AND_IM = 0x29,
+  INS_AND_ZP = 0x25,
+  INS_AND_ZP_X = 0x35,
+  INS_AND_ABS = 0x2D,
+  INS_AND_ABS_X = 0x3D,
+  INS_AND_ABS_Y = 0x39,
+  INS_AND_IND_X = 0x21,
+  INS_AND_IND_Y = 0x31,
+
+  //BIT
+  INS_BIT_ZP = 0x24,
+  INS_BIT_ABS = 0x2C,
+
+  //EOR
+  INS_EOR_IM = 0x49,
+  INS_EOR_ZP = 0x45,
+  INS_EOR_ZP_X = 0x55,
+  INS_EOR_ABS = 0x4D,
+  INS_EOR_ABS_X = 0x5D,
+  INS_EOR_ABS_Y = 0x59,
+  INS_EOR_IND_X = 0x41,
+  INS_EOR_IND_Y = 0x51,
+
+  //ORA
+  INS_ORA_IM = 0x09,
+  INS_ORA_ZP = 0x05,
+  INS_ORA_ZP_X = 0x15,
+  INS_ORA_ABS = 0x0D,
+  INS_ORA_ABS_X = 0x1D,
+  INS_ORA_ABS_Y = 0x19,
+  INS_ORA_IND_X = 0x01,
+  INS_ORA_IND_Y = 0x11,
+
   //JMP
   INS_JMP_ABS = 0x4C,
   INS_JMP_IND = 0x6C,
