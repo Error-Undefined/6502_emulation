@@ -767,13 +767,62 @@ static char* test_ora_ind_y()
 static char* test_bit_zp()
 {
   start_test_info();
+  // Given
+  s32 cycles = 3;
+  Byte value_mem = 0xA4;
+  Byte addr_zp = 0x31;
+  Byte acc_value = 0x53; // Chosen as 0xA4 & 0x53 = 0
+
+  // Setup
+  memory->memory_array[0xFFFC] = INS_BIT_ZP;
+  memory->memory_array[0xFFFD] = addr_zp;
+  memory->memory_array[addr_zp] = value_mem;
+  cpu->Acc = acc_value;
+  cpu->status_flags.V = 0;
+  cpu->status_flags.N = 0;
+  cpu->status_flags.Z = 0;
+
+  // Execute
+  execute(cpu, &cycles);
+
+  //Assert
+  mu_assert("INS_BIT_ZP should take 3 cycles", cycles == 0);
+  mu_assert("V status flag should be set correctly", cpu->status_flags.V == 0);
+  mu_assert("N status flag should be set correctly", cpu->status_flags.N == 1);
+  mu_assert("When AND op returns 0, zero flag should be set", cpu->status_flags.Z == 1);
 
   return 0;
 }
 
 static char* test_bit_abs()
 {
-  start_test_info();
+   start_test_info();
+  // Given
+  s32 cycles = 4;
+  Byte value_mem = 0x72;
+  Byte lower_address = 0x41;
+  Byte higher_Address = 0xAA;
+  Word total_address = 0xAA41;
+  Byte acc_value = 0x19; // Chosen as 0xA4 & 0x53 != 0
+
+  // Setup
+  memory->memory_array[0xFFFC] = INS_BIT_ZP;
+  memory->memory_array[0xFFFD] = lower_address;
+  memory->memory_array[0xFFFE] = higher_Address;
+  memory->memory_array[total_address] = value_mem;
+  cpu->Acc = acc_value;
+  cpu->status_flags.V = 0;
+  cpu->status_flags.N = 0;
+  cpu->status_flags.Z = 0;
+
+  // Execute
+  execute(cpu, &cycles);
+
+  //Assert
+  mu_assert("INS_BIT_ABS should take 4 cycles", cycles == 0);
+  mu_assert("V status flag should be set correctly", cpu->status_flags.V == 1);
+  mu_assert("N status flag should be set correctly", cpu->status_flags.N == 0);
+  mu_assert("When AND op is not 0, zero flag should not be set", cpu->status_flags.Z == 0);
 
   return 0;
 }

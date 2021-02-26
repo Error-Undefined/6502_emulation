@@ -695,6 +695,7 @@ void execute(struct cpu_struct *cpu, s32* cycles)
         and_register(cpu, cycles, &cpu->Acc, addr_ind);
         break;
       }
+
       //--EOR--//
       case INS_EOR_IM:
       {
@@ -744,6 +745,8 @@ void execute(struct cpu_struct *cpu, s32* cycles)
         eor_register(cpu, cycles, &cpu->Acc, addr_ind);
         break;
       }
+
+      //--ORA--//
       case INS_ORA_IM:
       {
         Byte or_value = fetch_byte(cpu, cycles);
@@ -792,6 +795,7 @@ void execute(struct cpu_struct *cpu, s32* cycles)
         or_register(cpu, cycles, &cpu->Acc, addr_ind);
         break;
       }
+      
 
       //--System instructions--//
       case INS_NOP:
