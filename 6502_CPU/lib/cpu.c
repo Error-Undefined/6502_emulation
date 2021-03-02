@@ -36,8 +36,8 @@ void reset_cpu_word(struct cpu_struct* cpu, struct memory_struct* memory, Word r
   cpu->memory_bus = memory;
 
   cpu->clock_time = 1000;
-  clock_gettime(CLOCK_UPTIME_RAW, &cpu->last_clock_time);
-  clock_gettime(CLOCK_UPTIME_RAW, &cpu->new_time);
+  clock_gettime(CLOCK_MONOTONIC, &cpu->last_clock_time);
+  clock_gettime(CLOCK_MONOTONIC, &cpu->new_time);
 
   initialize_memory(memory);
 }
@@ -52,7 +52,7 @@ static inline long time_nanos(struct timespec* time_struct)
 static inline void consume_cycle(struct cpu_struct* cpu,s32* cycles)
 {
   *(cycles) = *(cycles) - 1;
-  clock_gettime(CLOCK_UPTIME_RAW, &cpu->new_time);
+  clock_gettime(CLOCK_MONOTONIC, &cpu->new_time);
   long old_time = time_nanos(&cpu->last_clock_time);
   long new_time = time_nanos(&cpu->new_time);
   long nano_time_sleep = cpu->clock_time - (new_time - old_time);
