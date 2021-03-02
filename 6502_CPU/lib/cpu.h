@@ -1,3 +1,5 @@
+#include <time.h>
+
 #include "data_types.h"
 #include "memory.h"
 
@@ -26,6 +28,11 @@ struct cpu_struct
 
   // Pointer to the memory for the CPU - like a memory bus
   struct memory_struct* memory_bus;
+
+  //--CPU clock parts--//
+  u32 clock_time; //CPU clock time in ns (= 1/f)
+  struct timespec last_clock_time;
+  struct timespec new_time;
 };
 
 // Reset ops

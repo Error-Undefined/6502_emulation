@@ -35,17 +35,40 @@ void reset_cpu_word(struct cpu_struct* cpu, struct memory_struct* memory, Word r
 
   cpu->memory_bus = memory;
 
+  cpu->clock_time = 1000;
+  clock_gettime(CLOCK_UPTIME_RAW, &cpu->last_clock_time);
+  clock_gettime(CLOCK_UPTIME_RAW, &cpu->new_time);
+
   initialize_memory(memory);
 }
 
+static inline long time_nanos(struct timespec* time_struct)
+{
+  long result = 1000000000 * time_struct->tv_sec + time_struct->tv_nsec;
+  return result;
+}
+
 // Consumes a cycle from the clock
-static void consume_cycle(s32* cycles)
+static inline void consume_cycle(struct cpu_struct* cpu,s32* cycles)
 {
   *(cycles) = *(cycles) - 1;
+  clock_gettime(CLOCK_UPTIME_RAW, &cpu->new_time);
+  long old_time = time_nanos(&cpu->last_clock_time);
+  long new_time = time_nanos(&cpu->new_time);
+  long nano_time_sleep = cpu->clock_time - (new_time - old_time);
+  nano_time_sleep = nano_time_sleep > 0 ? nano_time_sleep : 0;
+  printf("Time delta: %ld\n", new_time-old_time);
+  printf("Sleep time: %ld\n", nano_time_sleep);
+  struct timespec sleep;
+  sleep.tv_nsec = nano_time_sleep;
+  sleep.tv_sec = 0;
+  nanosleep(&sleep, &sleep);
+  cpu->last_clock_time.tv_nsec = cpu->new_time.tv_nsec;
+  cpu->last_clock_time.tv_sec = cpu->new_time.tv_sec;
 }
 
 /*
-static void consume_cycles(s32* cycles, int nbr)
+static void consume_cyclescpu,(s32* cycles, int nbr)
 {
   *(cycles) = *(cycles) - nbr;
 }
@@ -64,7 +87,7 @@ static void transfer_byte_to_cpu_status(struct cpu_struct* cpu, s32* cycles, Byt
   cpu->status_flags.V = value >> 6 & 1;
   cpu->status_flags.N = value >> 7 & 1;
   
-  consume_cycle(cycles);
+  consume_cycle(cpu,cycles);
 }
 
 // Transfers the contents of the processor status flags to a byte.
@@ -79,7 +102,7 @@ static Byte transfer_cpu_status_to_byte(struct cpu_struct* cpu, s32* cycles)
   status = (status << 1) | cpu->status_flags.I;
   status = (status << 1) | cpu->status_flags.Z;
   status = (status << 1) | cpu->status_flags.C;
-  consume_cycle(cycles);
+  consume_cycle(cpu,cycles);
   return status;
 }
 
@@ -89,7 +112,7 @@ Byte fetch_byte(struct cpu_struct *cpu, s32* cycles)
 {
   Byte to_fetch = cpu->memory_bus->memory_array[cpu->PC];
   ++cpu->PC;
-  consume_cycle(cycles);
+  consume_cycle(cpu,cycles);
   return to_fetch;
 }
 
@@ -109,7 +132,7 @@ Word fetch_word(struct cpu_struct *cpu, s32* cycles)
 Byte read_byte(struct cpu_struct *cpu, s32* cycles, Word address)
 {
   Byte to_read = cpu->memory_bus->memory_array[address];
-  consume_cycle(cycles);
+  consume_cycle(cpu,cycles);
   return to_read;
 }
 
@@ -128,7 +151,7 @@ Word read_word(struct cpu_struct *cpu, s32* cycles, Word address)
 void write_byte(struct cpu_struct *cpu, s32* cycles, Word address, Byte value)
 {
   cpu->memory_bus->memory_array[address] = value;
-  consume_cycle(cycles);
+  consume_cycle(cpu,cycles);
 }
 
 // Writes a word to the given memory address. Consumes 2 clock cycle.
@@ -200,7 +223,7 @@ static Byte address_zero_page_x(struct cpu_struct* cpu, s32* cycles)
 {
   Byte address_in_zp = fetch_byte(cpu, cycles);
   address_in_zp = (address_in_zp + cpu->X) & 0xFF;
-  consume_cycle(cycles);
+  consume_cycle(cpu,cycles);
   return address_in_zp;
 }
 
@@ -209,7 +232,7 @@ static Byte address_zero_page_y(struct cpu_struct* cpu, s32* cycles)
 {
   Byte address_in_zp = fetch_byte(cpu, cycles);
   address_in_zp = (address_in_zp + cpu->Y) & 0xFF;
-  consume_cycle(cycles);
+  consume_cycle(cpu,cycles);
   return address_in_zp;
 }
 
@@ -227,7 +250,7 @@ static Word address_absolute_x(struct cpu_struct* cpu, s32* cycles, int check_pa
   // Test if we cross a page boundary (Higher byte after addition is different) and consume a cycle
   if(check_page_bounds && ((addr_absolute >> 8) ^ ((addr_absolute + cpu->X) >> 8)))
   {
-    consume_cycle(cycles);
+    consume_cycle(cpu,cycles);
   }
   addr_absolute += cpu->X;
   return addr_absolute;
@@ -240,7 +263,7 @@ static Word address_absolute_y(struct cpu_struct* cpu, s32* cycles, int check_pa
   // Test if we cross a page boundary (Higher byte after addition is different) and consume a cycle
   if(check_page_bounds && ((addr_absolute >> 8) ^ ((addr_absolute + cpu->Y) >> 8)))
   {
-    consume_cycle(cycles);
+    consume_cycle(cpu,cycles);
   }
   addr_absolute += cpu->Y;
   return addr_absolute;
@@ -261,7 +284,7 @@ static Word address_indexed_indirect(struct cpu_struct* cpu, s32* cycles)
   Byte address_ind = fetch_byte(cpu, cycles);
   //Wrap to zero page and consume a cycle
   address_ind = (address_ind + cpu->X) & 0xFF;
-  consume_cycle(cycles);
+  consume_cycle(cpu,cycles);
   Word value_address = read_word(cpu, cycles, address_ind);
   return value_address;
 }
@@ -275,7 +298,7 @@ static Word address_indirect_indexed(struct cpu_struct* cpu, s32* cycles, int ch
   //Add Y register. Test if we cross a page boundary and then consume an extra cycle
   if(check_page_boundary && ((address_from_zp >> 8) ^ ((address_from_zp + cpu->Y) >> 8)))
   {
-    consume_cycle(cycles);
+    consume_cycle(cpu,cycles);
   }
   address_from_zp = address_from_zp + cpu->Y;
   return address_from_zp;
@@ -309,7 +332,7 @@ static Byte pop_byte_from_stack(struct cpu_struct* cpu, s32* cycles)
 {
   cpu->SP = cpu->SP + 1;
   Word stack_addr = 0x100 | cpu->SP;
-  consume_cycle(cycles);
+  consume_cycle(cpu,cycles);
   Byte popped_byte = read_byte(cpu, cycles, stack_addr);
   return popped_byte;
 }
@@ -483,14 +506,14 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       {
         Word addr_absolute = address_absolute_x(cpu, cycles, 0);
         write_byte(cpu, cycles, addr_absolute, cpu->Acc);
-        consume_cycle(cycles);
+        consume_cycle(cpu,cycles);
         break;
       }
       case INS_STA_ABS_Y:
       {
         Word addr_absolute = address_absolute_y(cpu, cycles, 0);
         write_byte(cpu, cycles, addr_absolute, cpu->Acc);
-        consume_cycle(cycles);
+        consume_cycle(cpu,cycles);
         break;
       }
       case INS_STA_IND_X:
@@ -503,7 +526,7 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       {
         Word addr_indirect_word = address_indirect_indexed(cpu, cycles, 0);
         write_byte(cpu, cycles, addr_indirect_word, cpu->Acc);
-        consume_cycle(cycles);
+        consume_cycle(cpu,cycles);
         break;
       }
       //--STX--//
@@ -548,49 +571,49 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       case INS_TAX_IMP:
       {
         load_to_register(cpu, &cpu->X, cpu->Acc);
-        consume_cycle(cycles);
+        consume_cycle(cpu,cycles);
         break;
       }
       //--TAY--//
       case INS_TAY_IMP:
       {
         load_to_register(cpu, &cpu->Y, cpu->Acc);
-        consume_cycle(cycles);
+        consume_cycle(cpu,cycles);
         break;
       }
       //--TXA--//
       case INS_TXA_IMP:
       {
         load_to_register(cpu, &cpu->Acc, cpu->X);
-        consume_cycle(cycles);
+        consume_cycle(cpu,cycles);
         break;
       }
       //--TYA--//
       case INS_TYA_IMP:
       {
         load_to_register(cpu, &cpu->Acc, cpu->Y);
-        consume_cycle(cycles);
+        consume_cycle(cpu,cycles);
         break;
       }
       //--TSX--//
       case INS_TSX_IMP:
       {
         load_to_register(cpu, &cpu->X, cpu->SP);
-        consume_cycle(cycles);
+        consume_cycle(cpu,cycles);
         break;
       }
       //--TXS--//
       case INS_TXS_IMP:
       {
         cpu->SP = cpu->X;
-        consume_cycle(cycles);
+        consume_cycle(cpu,cycles);
         break;
       }
       //--PHA--//
       case INS_PHA_IMP:
       {
         push_byte_to_stack(cpu, cycles, cpu->Acc);
-        consume_cycle(cycles);
+        consume_cycle(cpu,cycles);
         break;
       }
       //--PLA--//
@@ -598,7 +621,7 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       {
         Byte stack_byte = pop_byte_from_stack(cpu, cycles);
         load_to_register(cpu, &cpu->Acc, stack_byte);
-        consume_cycle(cycles);
+        consume_cycle(cpu,cycles);
         break;
       }
       //--PHP--//
@@ -635,7 +658,7 @@ void execute(struct cpu_struct *cpu, s32* cycles)
         Word addr_absolute = address_absolute(cpu, cycles);
         push_word_to_stack(cpu, cycles, cpu->PC - 1);
         cpu->PC = addr_absolute;
-        consume_cycle(cycles);
+        consume_cycle(cpu,cycles);
         break;
       }
       //--RTS--//
@@ -643,7 +666,7 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       {
         cpu->PC = pop_word_from_stack(cpu, cycles);
         cpu->PC = cpu->PC + 1;
-        consume_cycle(cycles);
+        consume_cycle(cpu,cycles);
         break;
       }
       //--AND--//
@@ -817,7 +840,7 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       //--System instructions--//
       case INS_NOP:
       {
-        consume_cycle(cycles);
+        consume_cycle(cpu,cycles);
         break;
       }
 
