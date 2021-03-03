@@ -52,6 +52,7 @@ static inline long time_nanos(struct timespec* time_struct)
 static inline void consume_cycle(struct cpu_struct* cpu,s32* cycles)
 {
   *(cycles) = *(cycles) - 1;
+  /* 
   clock_gettime(CLOCK_MONOTONIC, &cpu->new_time);
   long old_time = time_nanos(&cpu->last_clock_time);
   long new_time = time_nanos(&cpu->new_time);
@@ -65,6 +66,7 @@ static inline void consume_cycle(struct cpu_struct* cpu,s32* cycles)
   nanosleep(&sleep, &sleep);
   cpu->last_clock_time.tv_nsec = cpu->new_time.tv_nsec;
   cpu->last_clock_time.tv_sec = cpu->new_time.tv_sec;
+  */
 }
 
 /*

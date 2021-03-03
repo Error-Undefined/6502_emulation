@@ -28,10 +28,61 @@ static char* test_nop()
   return 0;
 }
 
+static char* test_brk()
+{
+  start_test_info();
+  //Given
+  reset_cpu_word(cpu, memory, 0x8000);
+
+  s32 cycles = 7;
+  Byte lower_interrupt_address = 0x45;
+  Byte higher_interrupt_address = 0xC1;
+  Word interrupt_address = 0xC145;
+  Byte processor_flags = 0xE2; //0b11100010
+
+  //Setup
+  memory->memory_array[0x8000] = INS_BRK_IMP;
+  memory->memory_array[0x8001] = lower_interrupt_address;
+  memory->memory_array[0x8002] = higher_interrupt_address;
+  cpu->status_flags.C = 0;
+  cpu->status_flags.Z = 1;
+  cpu->status_flags.I = 0;
+  cpu->status_flags.D = 0;
+  cpu->status_flags.B = 0;
+  cpu->status_flags.V = 1;
+  cpu->status_flags.N = 1;
+
+  //Execute
+  execute(cpu, &cycles);
+
+  //Assert
+  mu_assert("Break should take 7 cycles", cycles == 0);
+  mu_assert("Break flag set after interrupt", cpu->status_flags.B == 1);
+  mu_assert("Program counter should be interrupt address", cpu->PC == interrupt_address);
+  mu_assert("Processor flags pushed onto the stack", memory->memory_array[0x1FF] = processor_flags);
+  mu_assert("Old program counter pushed onto the stack", memory->memory_array[0x1FE] = 0x80);
+  mu_assert("Old program counter pushed onto the stack", memory->memory_array[0x1FD] = 0x83);
+
+  return 0;
+}
+
+static char* test_rti()
+{
+  start_test_info();
+
+  return 0;
+}
+
 static char* all_sys_test()
 {
   before();
   mu_run_test(test_nop);
+
+  before();
+  mu_run_test(test_brk);
+
+  before();
+  mu_run_test(test_rti);
 
   return 0;
 }

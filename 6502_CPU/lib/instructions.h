@@ -114,6 +114,10 @@ enum Instruction
   //RTS
   INS_RTS_IMP = 0x60,
 
+  //BRK
+  INS_BRK_IMP = 0x00,
+  //RTI
+  INS_RTI_IMP = 0x40,
   // NOP
   INS_NOP = 0xEA
 };

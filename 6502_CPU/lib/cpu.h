@@ -16,14 +16,22 @@ struct cpu_struct
 
   struct status_flags
   {
-    Byte C : 1; // Bit 0, Carry flag
-    Byte Z : 1; // Bit 1, Zero flag
-    Byte I : 1; // Bit 2, Interrupt disable
-    Byte D : 1; // Bit 3, Decimal mode flag
-    Byte B : 1; // Bit 4, Break command
-    Byte U : 1; // Bit 5, Unused  
-    Byte V : 1; // Bit 6, Overflow flag
-    Byte N : 1; // Bit 7, Negative flag
+    // Bit 0, Carry flag
+    Byte C : 1; 
+    // Bit 1, Zero flag
+    Byte Z : 1; 
+    // Bit 2, Interrupt disable
+    Byte I : 1; 
+    // Bit 3, Decimal mode flag
+    Byte D : 1; 
+    // Bit 4, Break command
+    Byte B : 1; 
+    // Bit 5, Unused  
+    Byte U : 1; 
+    // Bit 6, Overflow flag
+    Byte V : 1; 
+    // Bit 7, Negative flag
+    Byte N : 1; 
   } status_flags; // Bit field makes this struct only 8 bits and conforms to the original 6502
 
   // Pointer to the memory for the CPU - like a memory bus

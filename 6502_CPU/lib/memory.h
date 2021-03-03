@@ -8,7 +8,7 @@ typedef struct memory_struct memory_type;
 struct memory_struct
 {
   // The 6502 accesses 64 kB of memory on an 16 bit bus (in hex 0xFFFF)
-  Byte memory_array[MEM_LENTGH]; 
+  Byte memory_array[MEM_LENTGH + 1]; 
 };
 
 void initialize_memory(struct memory_struct* memory);
