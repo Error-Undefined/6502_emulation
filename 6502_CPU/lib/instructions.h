@@ -107,12 +107,27 @@ enum Instruction
   //JMP
   INS_JMP_ABS = 0x4C,
   INS_JMP_IND = 0x6C,
-
   //JSR
   INS_JSR_ABS = 0x20,
-
   //RTS
   INS_RTS_IMP = 0x60,
+
+  //Branch carry clear
+  INS_BCC_REL = 0x90,
+  //Branch carry set
+  INS_BCS_REL = 0xB0,
+  //Branch zeroflag set
+  INS_BEQ_REL = 0xF0,
+  //Branch zeroflag clear
+  INS_BNE_REL = 0xD0,
+  //Branch negative set
+  INS_BMI_REL = 0x30,
+  //Branch negative clear
+  INS_BPL_REL = 0x10,
+  //Branch overflow clear
+  INS_BVC_REL = 0x50,
+  //Branch overflow clear
+  INS_BVS_REL = 0x70,
 
   //BRK
   INS_BRK_IMP = 0x00,
