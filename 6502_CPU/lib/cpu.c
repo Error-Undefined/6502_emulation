@@ -314,7 +314,6 @@ static void push_byte_to_stack(struct cpu_struct* cpu, s32* cycles, Byte value)
   Word stack_addr = 0x100 | cpu->SP;
   write_byte(cpu, cycles, stack_addr, value);
   cpu->SP = cpu->SP - 1;
-
 }
 
 // Pushes a word on the stack. The higher byte is pushed first, followed by the lower byte. 
@@ -329,18 +328,17 @@ static void push_word_to_stack(struct cpu_struct* cpu, s32* cycles, Word value)
 }
 
 // Pops a byte from the stack. The stack pointer is incremented.
-// Consumes 2 clock cycles
+// Consumes 1 clock cycle
 static Byte pop_byte_from_stack(struct cpu_struct* cpu, s32* cycles)
 {
   cpu->SP = cpu->SP + 1;
   Word stack_addr = 0x100 | cpu->SP;
-  consume_cycle(cpu,cycles);
   Byte popped_byte = read_byte(cpu, cycles, stack_addr);
   return popped_byte;
 }
 
 // Pops a word from the stack. The stack pointer is incremented.
-// Consumes 4 clock cycles
+// Consumes 2 clock cycles
 static Word pop_word_from_stack(struct cpu_struct* cpu, s32* cycles)
 {
   Byte lower_byte = pop_byte_from_stack(cpu, cycles);
@@ -624,6 +622,7 @@ void execute(struct cpu_struct *cpu, s32* cycles)
         Byte stack_byte = pop_byte_from_stack(cpu, cycles);
         load_to_register(cpu, &cpu->Acc, stack_byte);
         consume_cycle(cpu,cycles);
+        consume_cycle(cpu, cycles);
         break;
       }
       //--PHP--//
@@ -638,6 +637,7 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       {
         Byte processor_status = pop_byte_from_stack(cpu, cycles);
         transfer_byte_to_cpu_status(cpu, cycles, processor_status);
+        consume_cycle(cpu, cycles);
         break;
       }
 
@@ -669,6 +669,8 @@ void execute(struct cpu_struct *cpu, s32* cycles)
         cpu->PC = pop_word_from_stack(cpu, cycles);
         cpu->PC = cpu->PC + 1;
         consume_cycle(cpu,cycles);
+        consume_cycle(cpu, cycles);
+        consume_cycle(cpu, cycles);
         break;
       }
       //--AND--//
@@ -840,6 +842,25 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       }
 
       //--System instructions--//
+      case INS_BRK_IMP:
+      {
+        Word irq_brk_vector = read_word(cpu, cycles, 0xFFFE);
+        Byte processor_flags = transfer_cpu_status_to_byte(cpu, cycles);
+        push_byte_to_stack(cpu, cycles, processor_flags);
+        push_word_to_stack(cpu, cycles, cpu->PC);
+        cpu->PC = irq_brk_vector;
+        cpu->status_flags.B = 1;
+        break;
+      }
+      case INS_RTI_IMP:
+      {
+        Byte processor_flags = pop_byte_from_stack(cpu, cycles);
+        Word return_from_interrupt = pop_word_from_stack(cpu, cycles);
+        transfer_byte_to_cpu_status(cpu, cycles, processor_flags);
+        cpu->PC = return_from_interrupt;
+        consume_cycle(cpu, cycles);
+        break;
+      }
       case INS_NOP:
       {
         consume_cycle(cpu,cycles);

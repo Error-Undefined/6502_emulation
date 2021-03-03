@@ -69,6 +69,36 @@ static char* test_brk()
 static char* test_rti()
 {
   start_test_info();
+  //Given
+  reset_cpu_word(cpu, memory, 0x8000);
+
+  s32 cycles = 6;
+  Byte lower_interrupt_address = 0x45;
+  Byte higher_interrupt_address = 0xC1;
+  Word interrupt_return_address = 0xC145;
+  Byte processor_flags = 0xE2; //0b11100010
+
+  //Setup
+  memory->memory_array[0x8000] = INS_RTI_IMP;
+  memory->memory_array[0x1FD] = processor_flags;
+  memory->memory_array[0x1FE] = lower_interrupt_address;
+  memory->memory_array[0x1FF] = higher_interrupt_address;
+  cpu->SP = 0x1FC;
+
+  //Execute
+  execute(cpu, &cycles);
+
+  //Assert
+  mu_assert("RTI should take 6 cycles", cycles == 0);
+  mu_assert("New program counter should be loaded from the stack", cpu->PC == interrupt_return_address);
+  mu_assert("CPU flags should be set from stack", cpu->status_flags.C == 0);
+  mu_assert("CPU flags should be set from stack", cpu->status_flags.Z == 1);
+  mu_assert("CPU flags should be set from stack", cpu->status_flags.I == 0);
+  mu_assert("CPU flags should be set from stack", cpu->status_flags.D == 0);
+  mu_assert("CPU flags should be set from stack", cpu->status_flags.B == 0);
+  mu_assert("CPU flags should be set from stack", cpu->status_flags.U == 1);
+  mu_assert("CPU flags should be set from stack", cpu->status_flags.V == 1);
+  mu_assert("CPU flags should be set from stack", cpu->status_flags.N == 1);
 
   return 0;
 }
