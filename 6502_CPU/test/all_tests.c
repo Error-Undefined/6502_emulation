@@ -41,6 +41,10 @@ int main()
   if(run_all_logic_test(&cpu, &memory) != 0)
     goto test_failed;
 
+  printf("Running branch test...\n");
+  if(run_all_branch_test(&cpu, &memory) != 0)
+    goto test_failed;
+
   printf("Running system instruction test...\n");
   if(run_all_sys_test(&cpu, &memory) != 0)
     goto test_failed;
