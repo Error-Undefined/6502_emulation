@@ -42,8 +42,8 @@ static char* test_brk()
 
   //Setup
   memory->memory_array[0x8000] = INS_BRK_IMP;
-  memory->memory_array[0x8001] = lower_interrupt_address;
-  memory->memory_array[0x8002] = higher_interrupt_address;
+  memory->memory_array[0xFFFE] = lower_interrupt_address;
+  memory->memory_array[0xFFFF] = higher_interrupt_address;
   cpu->status_flags.C = 0;
   cpu->status_flags.Z = 1;
   cpu->status_flags.I = 0;
