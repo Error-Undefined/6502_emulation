@@ -211,6 +211,24 @@ void or_register(struct cpu_struct* cpu, s32* cycles, Byte* register_to_and, Wor
   load_to_register(cpu, register_to_and, result);
 }
 
+// Branches to the given offset if the status flag has the given status
+// Consumes 1 clock cycle on a successful branch
+// Consumes 1 clock cycle (more) if the branch is to a new page of memory
+void branch_if(struct cpu_struct* cpu, s32* cycles, Byte status_flag, Byte status, RelativeOffset offset)
+{
+  if(status_flag != status)
+  {
+    return;
+  }
+  consume_cycle(cpu, cycles);
+  if((cpu->PC >> 8) != ((cpu->PC + offset) >> 8))
+  {
+    consume_cycle(cpu, cycles);
+  }
+  cpu->PC = cpu->PC + offset;
+  printf("PC: 0x%x\n", cpu->PC);
+}
+
 /* Addressing modes */
 
 //Consumes 1 clock cycle
@@ -304,6 +322,15 @@ static Word address_indirect_indexed(struct cpu_struct* cpu, s32* cycles, int ch
   }
   address_from_zp = address_from_zp + cpu->Y;
   return address_from_zp;
+}
+
+// Relative addressing mode.
+// Consumes 1 clock cycle
+static RelativeOffset address_relative(struct cpu_struct* cpu, s32* cycles)
+{
+  Byte raw_version = fetch_byte(cpu, cycles);
+  RelativeOffset result = (RelativeOffset) raw_version;
+  return result;
 }
 
 /* Stack operations */
@@ -838,6 +865,13 @@ void execute(struct cpu_struct *cpu, s32* cycles)
         cpu->status_flags.V = (value >> 6) & 1;
         cpu->status_flags.N = (value >> 7) & 1;
         cpu->status_flags.Z = (value & cpu->Acc) == 0 ? 1 : 0;
+        break;
+      }
+      //--Branch instructions--//
+      case INS_BCC_REL:
+      {
+        RelativeOffset offset = address_relative(cpu, cycles);
+        branch_if(cpu, cycles, cpu->status_flags.C, 0, offset);
         break;
       }
 

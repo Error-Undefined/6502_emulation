@@ -8,5 +8,8 @@ typedef unsigned int LongWord;
 typedef unsigned short Word;
 typedef unsigned char Byte;
 
-#define MEM_LENTGH (0xFFFF)
+// Branching addresses through a signed byte
+typedef signed char RelativeOffset;
+
+#define MEM_LENTGH (0xFFFF + 1)
 

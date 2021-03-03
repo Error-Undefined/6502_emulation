@@ -6,12 +6,27 @@
 
 static void before()
 {
-  reset_cpu(cpu, memory);
+  // Always reset to 0x8080
+  reset_cpu_word(cpu, memory, 0x8080);
 }
 
 static char* test_branch_carry_clear()
 {
   start_test_info();
+  //Given
+  s32 cycles = 2 + 1;
+  Byte branch_offset = 0x64; //0xFF signed is equivalent to -1 ASSUMING TWO'S COMPLEMENT
+
+  //Setup
+  memory->memory_array[0x8080] = INS_BCC_REL;
+  memory->memory_array[0x8081] = branch_offset;
+
+  //Execute
+  execute(cpu, &cycles);
+
+  //Assert
+  mu_assert("Successful branch should take 3 cycles", cycles == 0);
+  mu_assert("Program counter not set to the right value after branching", cpu->PC == 0x8082 + (RelativeOffset) branch_offset);
 
   return 0;
 }
