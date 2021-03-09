@@ -12,4 +12,5 @@
 #include "test_jmp_call.h"
 #include "test_branch.h"
 #include "test_sys.h"
+#include "test_clear.h"
 
