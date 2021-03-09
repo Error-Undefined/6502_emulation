@@ -226,7 +226,6 @@ void branch_if(struct cpu_struct* cpu, s32* cycles, Byte status_flag, Byte statu
     consume_cycle(cpu, cycles);
   }
   cpu->PC = cpu->PC + offset;
-  printf("PC: 0x%x\n", cpu->PC);
 }
 
 /* Addressing modes */
@@ -872,6 +871,48 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       {
         RelativeOffset offset = address_relative(cpu, cycles);
         branch_if(cpu, cycles, cpu->status_flags.C, 0, offset);
+        break;
+      }
+      case INS_BCS_REL:
+      {
+        RelativeOffset offset = address_relative(cpu, cycles);
+        branch_if(cpu, cycles, cpu->status_flags.C, 1, offset);
+        break;
+      }
+      case INS_BNE_REL:
+      {
+        RelativeOffset offset = address_relative(cpu, cycles);
+        branch_if(cpu, cycles, cpu->status_flags.Z, 0, offset);
+        break;
+      }
+      case INS_BEQ_REL:
+      {
+        RelativeOffset offset = address_relative(cpu, cycles);
+        branch_if(cpu, cycles, cpu->status_flags.Z, 1, offset);
+        break;
+      }
+      case INS_BPL_REL:
+      {
+        RelativeOffset offset = address_relative(cpu, cycles);
+        branch_if(cpu, cycles, cpu->status_flags.N, 0, offset);
+        break;
+      }
+      case INS_BMI_REL:
+      {
+        RelativeOffset offset = address_relative(cpu, cycles);
+        branch_if(cpu, cycles, cpu->status_flags.N, 1, offset);
+        break;
+      }
+      case INS_BVC_REL:
+      {
+        RelativeOffset offset = address_relative(cpu, cycles);
+        branch_if(cpu, cycles, cpu->status_flags.V, 0, offset);
+        break;
+      }
+      case INS_BVS_REL:
+      {
+        RelativeOffset offset = address_relative(cpu, cycles);
+        branch_if(cpu, cycles, cpu->status_flags.V, 1, offset);
         break;
       }
 
