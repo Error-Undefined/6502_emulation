@@ -915,7 +915,6 @@ void execute(struct cpu_struct *cpu, s32* cycles)
         branch_if(cpu, cycles, cpu->status_flags.V, 1, offset);
         break;
       }
-
       //--System instructions--//
       case INS_BRK_IMP:
       {
@@ -941,6 +940,50 @@ void execute(struct cpu_struct *cpu, s32* cycles)
         consume_cycle(cpu,cycles);
         break;
       }
+      //--Set/Clear instructions--//
+      case INS_CLC_IMP:
+      {
+        cpu->status_flags.C = 0;
+        consume_cycle(cpu, cycles);
+        break;
+      }
+      case INS_CLD_IMP:
+      {
+        cpu->status_flags.D = 0;
+        consume_cycle(cpu, cycles);
+        break;
+      }
+      case INS_CLI_IMP:
+      {
+        cpu->status_flags.I = 0;
+        consume_cycle(cpu, cycles);
+        break;
+      }
+      case INS_CLV_IMP:
+      {
+        cpu->status_flags.V = 0;
+        consume_cycle(cpu, cycles);
+        break;
+      }
+      case INS_SEC_IMP:
+      {
+        cpu->status_flags.C = 1;
+        consume_cycle(cpu, cycles);
+        break;
+      }
+      case INS_SED_IMP:
+      {
+        cpu->status_flags.D = 1;
+        consume_cycle(cpu, cycles);
+        break;
+      }
+      case INS_SEI_IMP:
+      {
+        cpu->status_flags.I = 1;
+        consume_cycle(cpu, cycles);
+        break;
+      }
+    
 
       default:
         printf("Found instruction 0x%x, not implemented! Returning from execution\n", instruction);
