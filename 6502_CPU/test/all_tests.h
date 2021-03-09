@@ -13,4 +13,4 @@
 #include "test_branch.h"
 #include "test_sys.h"
 #include "test_clear.h"
-
+#include "test_shift.h"

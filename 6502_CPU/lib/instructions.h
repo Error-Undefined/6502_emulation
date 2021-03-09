@@ -104,6 +104,34 @@ enum Instruction
   INS_ORA_IND_X = 0x01,
   INS_ORA_IND_Y = 0x11,
 
+  //ASL
+  INS_ASL_ACC = 0x0A,
+  INS_ASL_ZP = 0x06,
+  INS_ASL_ZP_X = 0x16,
+  INS_ASL_ABS = 0x0E,
+  INS_ASL_ABS_X = 0x1E,
+
+  //LSR
+  INS_LSR_ACC = 0x4A,
+  INS_LSR_ZP = 0x46,
+  INS_LSR_ZP_X = 0x56,
+  INS_LSR_ABS = 0x4E,
+  INS_LSR_ABS_X = 0x5E,
+
+  //ROL
+  INS_ROL_ACC = 0x2A,
+  INS_ROL_ZP = 0x26,
+  INS_ROL_ZP_X = 0x36,
+  INS_ROL_ABS = 0x2E,
+  INS_ROL_ABS_X = 0x3E,
+
+  //ROR
+  INS_ROR_ACC = 0x6A,
+  INS_ROR_ZP = 0x66,
+  INS_ROR_ZP_X = 0x76,
+  INS_ROR_ABS = 0x6E,
+  INS_ROR_ABS_X = 0x7E,
+
   //JMP
   INS_JMP_ABS = 0x4C,
   INS_JMP_IND = 0x6C,
