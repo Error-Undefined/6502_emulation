@@ -228,6 +228,26 @@ void branch_if(struct cpu_struct* cpu, s32* cycles, Byte status_flag, Byte statu
   cpu->PC = cpu->PC + offset;
 }
 
+/* ALU operations */
+
+// Does an arithmetic left shift at the address address.
+// Writes C,Z and N flags
+// Consumes 3 clock cycles.
+void arithmetic_shift_left(struct cpu_struct* cpu, s32* cycles, Word address)
+{
+  Byte old_val = read_byte(cpu, cycles, address);
+
+  Byte new_val = (old_val << 1) & 0xFF;
+  consume_cycle(cpu, cycles);
+  
+  write_byte(cpu, cycles, address, new_val);
+
+  cpu->status_flags.C = (old_val >> 7);
+  cpu->status_flags.Z = (cpu->Acc == 0 ? 1 : 0);
+  cpu->status_flags.N = (cpu->Acc >> 7);
+}
+
+
 /* Addressing modes */
 
 //Consumes 1 clock cycle
@@ -935,11 +955,30 @@ void execute(struct cpu_struct *cpu, s32* cycles)
         consume_cycle(cpu, cycles);
         break;
       }
-      case INS_NOP:
+
+      //-- Shift instructions --//
+      case INS_ASL_ACC:
       {
-        consume_cycle(cpu,cycles);
+        Byte old_val = cpu->Acc;
+        Byte new_val = (old_val << 1) & 0xFF;
+        cpu->Acc = new_val;
+        consume_cycle(cpu, cycles);
+
+        cpu->status_flags.C = (old_val >> 7);
+        cpu->status_flags.Z = (cpu->Acc == 0 ? 1 : 0);
+        cpu->status_flags.N = (cpu->Acc >> 7);
+
         break;
       }
+
+      case INS_ASL_ZP:
+      {
+        Byte addr_in_zp = address_zero_page(cpu, cycles);
+        arithmetic_shift_left(cpu, cycles, addr_in_zp);
+        
+        break;
+      }
+
       //--Set/Clear instructions--//
       case INS_CLC_IMP:
       {
@@ -981,6 +1020,13 @@ void execute(struct cpu_struct *cpu, s32* cycles)
       {
         cpu->status_flags.I = 1;
         consume_cycle(cpu, cycles);
+        break;
+      }
+
+      //-- Holy NOP--// 
+      case INS_NOP:
+      {
+        consume_cycle(cpu,cycles);
         break;
       }
     
